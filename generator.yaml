@@ -130,6 +130,11 @@ resources:
         from:
           operation: DescribeEndpoint
           path: ProductionVariants
+  NotebookInstance:
+    exceptions:
+          404:
+            code: ValidationException
+            message_prefix: Requested resource not found
   TrainingJob:
     exceptions:
       errors:
@@ -499,7 +504,7 @@ ignore:
       # - ModelQualityJobDefinition
       # - MonitoringSchedule
       - NotebookInstanceLifecycleConfig
-      - NotebookInstance
+      # NotebookInstance
       - Pipeline
       - PresignedDomainUrl
       - PresignedNotebookInstanceUrl

@@ -18,6 +18,7 @@ rules:
   - modelexplainabilityjobdefinitions
   - modelqualityjobdefinitions
   - monitoringschedules
+  - notebookinstances
   - processingjobs
   - trainingjobs
   - transformjobs
@@ -41,6 +42,7 @@ rules:
   - modelexplainabilityjobdefinitions
   - modelqualityjobdefinitions
   - monitoringschedules
+  - notebookinstances
   - processingjobs
   - trainingjobs
   - transformjobs

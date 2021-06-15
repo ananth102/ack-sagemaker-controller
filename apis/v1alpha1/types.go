@@ -61,10 +61,20 @@ type AlgorithmStatusItem struct {
 	FailureReason *string `json:"failureReason,omitempty"`
 }
 
+// Provides summary information about an algorithm.
+type AlgorithmSummary struct {
+	CreationTime *metav1.Time `json:"creationTime,omitempty"`
+}
+
 // Specifies configurations for one or more training jobs that Amazon SageMaker
 // runs to test the algorithm.
 type AlgorithmValidationSpecification struct {
 	ValidationRole *string `json:"validationRole,omitempty"`
+}
+
+// Details about an Amazon SageMaker app.
+type AppDetails struct {
+	CreationTime *metav1.Time `json:"creationTime,omitempty"`
 }
 
 // The configuration for running a SageMaker image as a KernelGateway app.
@@ -247,6 +257,12 @@ type CheckpointConfig struct {
 	S3URI     *string `json:"s3URI,omitempty"`
 }
 
+// Specifies summary information about a Git repository.
+type CodeRepositorySummary struct {
+	CreationTime     *metav1.Time `json:"creationTime,omitempty"`
+	LastModifiedTime *metav1.Time `json:"lastModifiedTime,omitempty"`
+}
+
 // Configuration information for the Debugger output tensor collections.
 type CollectionConfiguration struct {
 	CollectionName       *string            `json:"collectionName,omitempty"`
@@ -257,6 +273,8 @@ type CollectionConfiguration struct {
 type CompilationJobSummary struct {
 	CompilationEndTime   *metav1.Time `json:"compilationEndTime,omitempty"`
 	CompilationStartTime *metav1.Time `json:"compilationStartTime,omitempty"`
+	CreationTime         *metav1.Time `json:"creationTime,omitempty"`
+	LastModifiedTime     *metav1.Time `json:"lastModifiedTime,omitempty"`
 }
 
 // Describes the container, as part of model definition.
@@ -451,6 +469,12 @@ type DeviceSummary struct {
 	RegistrationTime *metav1.Time `json:"registrationTime,omitempty"`
 }
 
+// The domain's details.
+type DomainDetails struct {
+	CreationTime     *metav1.Time `json:"creationTime,omitempty"`
+	LastModifiedTime *metav1.Time `json:"lastModifiedTime,omitempty"`
+}
+
 // The model on the edge device.
 type EdgeModel struct {
 	LatestInference  *metav1.Time `json:"latestInference,omitempty"`
@@ -548,9 +572,10 @@ type ExperimentSummary struct {
 // a unique identifier for each row where each column in the table is a feature.
 // In principle, a Feature Group is composed of features and values per features.
 type FeatureGroup struct {
-	FailureReason    *string `json:"failureReason,omitempty"`
-	FeatureGroupName *string `json:"featureGroupName,omitempty"`
-	RoleARN          *string `json:"roleARN,omitempty"`
+	CreationTime     *metav1.Time `json:"creationTime,omitempty"`
+	FailureReason    *string      `json:"failureReason,omitempty"`
+	FeatureGroupName *string      `json:"featureGroupName,omitempty"`
+	RoleARN          *string      `json:"roleARN,omitempty"`
 }
 
 // The name, Arn, CreationTime, FeatureGroup values, LastUpdatedTime and EnableOnlineStorage
@@ -963,6 +988,7 @@ type ModelExplainabilityJobInput struct {
 
 // A versioned model that can be deployed for SageMaker inference.
 type ModelPackage struct {
+	CreationTime     *metav1.Time `json:"creationTime,omitempty"`
 	LastModifiedTime *metav1.Time `json:"lastModifiedTime,omitempty"`
 }
 
@@ -973,9 +999,24 @@ type ModelPackageContainerDefinition struct {
 	ModelDataURL      *string `json:"modelDataURL,omitempty"`
 }
 
+// A group of versioned models in the model registry.
+type ModelPackageGroup struct {
+	CreationTime *metav1.Time `json:"creationTime,omitempty"`
+}
+
+// Summary information about a model group.
+type ModelPackageGroupSummary struct {
+	CreationTime *metav1.Time `json:"creationTime,omitempty"`
+}
+
 // Represents the overall status of a model package.
 type ModelPackageStatusItem struct {
 	FailureReason *string `json:"failureReason,omitempty"`
+}
+
+// Provides summary information about a model package.
+type ModelPackageSummary struct {
+	CreationTime *metav1.Time `json:"creationTime,omitempty"`
 }
 
 // Specifies batch transform jobs that Amazon SageMaker runs to validate your
@@ -1216,6 +1257,27 @@ type NetworkConfig struct {
 	// Private Cloud (https://docs.aws.amazon.com/sagemaker/latest/dg/host-vpc.html)
 	// and Protect Training Jobs by Using an Amazon Virtual Private Cloud (https://docs.aws.amazon.com/sagemaker/latest/dg/train-vpc.html).
 	VPCConfig *VPCConfig `json:"vpcConfig,omitempty"`
+}
+
+// Provides a summary of a notebook instance lifecycle configuration.
+type NotebookInstanceLifecycleConfigSummary struct {
+	CreationTime                        *metav1.Time `json:"creationTime,omitempty"`
+	LastModifiedTime                    *metav1.Time `json:"lastModifiedTime,omitempty"`
+	NotebookInstanceLifecycleConfigName *string      `json:"notebookInstanceLifecycleConfigName,omitempty"`
+}
+
+// Provides summary information for an Amazon SageMaker notebook instance.
+type NotebookInstanceSummary struct {
+	AdditionalCodeRepositories          []*string    `json:"additionalCodeRepositories,omitempty"`
+	CreationTime                        *metav1.Time `json:"creationTime,omitempty"`
+	DefaultCodeRepository               *string      `json:"defaultCodeRepository,omitempty"`
+	InstanceType                        *string      `json:"instanceType,omitempty"`
+	LastModifiedTime                    *metav1.Time `json:"lastModifiedTime,omitempty"`
+	NotebookInstanceARN                 *string      `json:"notebookInstanceARN,omitempty"`
+	NotebookInstanceLifecycleConfigName *string      `json:"notebookInstanceLifecycleConfigName,omitempty"`
+	NotebookInstanceName                *string      `json:"notebookInstanceName,omitempty"`
+	NotebookInstanceStatus              *string      `json:"notebookInstanceStatus,omitempty"`
+	URL                                 *string      `json:"url,omitempty"`
 }
 
 // Specifies the number of training jobs that this hyperparameter tuning job
@@ -2061,6 +2123,12 @@ type UserContext struct {
 	UserProfileName *string `json:"userProfileName,omitempty"`
 }
 
+// The user profile details.
+type UserProfileDetails struct {
+	CreationTime     *metav1.Time `json:"creationTime,omitempty"`
+	LastModifiedTime *metav1.Time `json:"lastModifiedTime,omitempty"`
+}
+
 // A collection of settings that apply to users of Amazon SageMaker Studio.
 // These settings are specified when the CreateUserProfile API is called, and
 // as DefaultUserSettings when the CreateDomain API is called.
@@ -2069,7 +2137,8 @@ type UserContext struct {
 // settings in UserSettings, the values specified in CreateUserProfile take
 // precedence over those specified in CreateDomain.
 type UserSettings struct {
-	ExecutionRole *string `json:"executionRole,omitempty"`
+	ExecutionRole  *string   `json:"executionRole,omitempty"`
+	SecurityGroups []*string `json:"securityGroups,omitempty"`
 }
 
 // Specifies a VPC that your training jobs and hosted models have access to.

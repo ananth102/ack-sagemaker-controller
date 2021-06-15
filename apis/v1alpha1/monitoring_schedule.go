@@ -59,8 +59,6 @@ type MonitoringScheduleStatus struct {
 // MonitoringSchedule is the Schema for the MonitoringSchedules API
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="FailureReason",type=string,JSONPath=`.status.failureReason`
-// +kubebuilder:printcolumn:name="MonitoringScheduleStatus",type=string,JSONPath=`.status.monitoringScheduleStatus`
 type MonitoringSchedule struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

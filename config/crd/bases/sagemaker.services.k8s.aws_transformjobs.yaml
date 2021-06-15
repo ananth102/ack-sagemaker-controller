@@ -16,14 +16,7 @@ spec:
     singular: transformjob
   scope: Namespaced
   versions:
-  - additionalPrinterColumns:
-    - jsonPath: .status.failureReason
-      name: FailureReason
-      type: string
-    - jsonPath: .status.transformJobStatus
-      name: TransformJobStatus
-      type: string
-    name: v1alpha1
+  - name: v1alpha1
     schema:
       openAPIV3Schema:
         description: TransformJob is the Schema for the TransformJobs API

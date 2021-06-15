@@ -16,14 +16,7 @@ spec:
     singular: endpoint
   scope: Namespaced
   versions:
-  - additionalPrinterColumns:
-    - jsonPath: .status.endpointStatus
-      name: EndpointStatus
-      type: string
-    - jsonPath: .status.failureReason
-      name: FailureReason
-      type: string
-    name: v1alpha1
+  - name: v1alpha1
     schema:
       openAPIV3Schema:
         description: Endpoint is the Schema for the Endpoints API

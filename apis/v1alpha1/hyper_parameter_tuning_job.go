@@ -91,8 +91,6 @@ type HyperParameterTuningJobStatus struct {
 // HyperParameterTuningJob is the Schema for the HyperParameterTuningJobs API
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="FailureReason",type=string,JSONPath=`.status.failureReason`
-// +kubebuilder:printcolumn:name="HyperParameterTuningJobStatus",type=string,JSONPath=`.status.hyperParameterTuningJobStatus`
 type HyperParameterTuningJob struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

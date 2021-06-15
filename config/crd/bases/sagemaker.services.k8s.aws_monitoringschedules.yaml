@@ -16,14 +16,7 @@ spec:
     singular: monitoringschedule
   scope: Namespaced
   versions:
-  - additionalPrinterColumns:
-    - jsonPath: .status.failureReason
-      name: FailureReason
-      type: string
-    - jsonPath: .status.monitoringScheduleStatus
-      name: MonitoringScheduleStatus
-      type: string
-    name: v1alpha1
+  - name: v1alpha1
     schema:
       openAPIV3Schema:
         description: MonitoringSchedule is the Schema for the MonitoringSchedules
