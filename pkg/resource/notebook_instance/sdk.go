@@ -61,7 +61,7 @@ func (rm *resourceManager) sdkFind(
 	resp, respErr := rm.sdkapi.DescribeNotebookInstanceWithContext(ctx, input)
 	rm.metrics.RecordAPICall("READ_ONE", "DescribeNotebookInstance", respErr)
 	if respErr != nil {
-		if awsErr, ok := ackerr.AWSError(respErr); ok && awsErr.Code() == "UNKNOWN" {
+		if awsErr, ok := ackerr.AWSError(respErr); ok && awsErr.Code() == "ValidationException" && strings.HasPrefix(awsErr.Message(), "RecordNotFound") {
 			return nil, ackerr.NotFound
 		}
 		return nil, respErr
@@ -205,6 +205,7 @@ func (rm *resourceManager) sdkCreate(
 
 	rm.setStatusDefaults(ko)
 
+	rm.customSetOutput(r, aws.String(svcsdk.NotebookInstanceStatusPending), ko)
 	return &resource{ko}, nil
 }
 
@@ -285,6 +286,7 @@ func (rm *resourceManager) sdkUpdate(
 	latest *resource,
 	delta *ackcompare.Delta,
 ) (*resource, error) {
+	rm.customUpdate(ctx, desired, latest, delta)
 
 	input, err := rm.newUpdateRequestPayload(ctx, desired)
 	if err != nil {
@@ -361,6 +363,7 @@ func (rm *resourceManager) sdkDelete(
 	ctx context.Context,
 	r *resource,
 ) error {
+	rm.customDelete(ctx, r)
 
 	input, err := rm.newDeleteRequestPayload(r)
 	if err != nil {
@@ -469,6 +472,29 @@ func (rm *resourceManager) updateConditions(
 // and if the exception indicates that it is a Terminal exception
 // 'Terminal' exception are specified in generator configuration
 func (rm *resourceManager) terminalAWSError(err error) bool {
-	// No terminal_errors specified for this resource in generator config
-	return false
+	if err == nil {
+		return false
+	}
+	awsErr, ok := ackerr.AWSError(err)
+	if !ok {
+		return false
+	}
+	switch awsErr.Code() {
+	case "ResourceLimitExceeded",
+		"ResourceNotFound",
+		"ResourceInUse",
+		"OptInRequired",
+		"InvalidParameterCombination",
+		"InvalidParameterValue",
+		"MissingParameter",
+		"MissingAction",
+		"InvalidClientTokenId",
+		"InvalidQueryParameter",
+		"MalformedQueryString",
+		"InvalidAction",
+		"UnrecognizedClientException":
+		return true
+	default:
+		return false
+	}
 }

@@ -132,9 +132,39 @@ resources:
           path: ProductionVariants
   NotebookInstance:
     exceptions:
+      errors:
           404:
             code: ValidationException
-            message_prefix: Requested resource not found
+            message_prefix: RecordNotFound
+      terminal_codes:
+        - ResourceLimitExceeded
+        - ResourceNotFound
+        - ResourceInUse
+        - OptInRequired
+        - InvalidParameterCombination
+        - InvalidParameterValue
+        - MissingParameter
+        - MissingAction
+        - InvalidClientTokenId
+        - InvalidQueryParameter
+        - MalformedQueryString
+        - InvalidAction
+        - UnrecognizedClientException
+    hooks:
+      sdk_update_pre_build_request:
+        code: rm.customUpdate(ctx,desired,latest,delta)
+      sdk_create_post_set_output:
+        code: rm.customSetOutput(r, aws.String(svcsdk.NotebookInstanceStatusPending),ko)
+      sdk_delete_pre_build_request:
+        code: rm.customDelete(ctx,r)
+      delta_pre_compare:
+        code: customSetDefaults(a, b)
+    fields:
+      woof:
+        is_read_only: false
+        is_printable: true
+
+
   TrainingJob:
     exceptions:
       errors:

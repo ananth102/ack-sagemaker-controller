@@ -31,6 +31,7 @@ func newResourceDelta(
 		delta.Add("", a, b)
 		return delta
 	}
+	customSetDefaults(a, b)
 
 	if !ackcompare.SliceStringPEqual(a.ko.Spec.AcceleratorTypes, b.ko.Spec.AcceleratorTypes) {
 		delta.Add("Spec.AcceleratorTypes", a.ko.Spec.AcceleratorTypes, b.ko.Spec.AcceleratorTypes)
