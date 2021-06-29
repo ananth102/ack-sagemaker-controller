@@ -93,17 +93,20 @@ resources:
         - EndpointUpdateError
     hooks:
       sdk_create_post_set_output:
-        code: rm.customSetOutput(r, aws.String(svcsdk.EndpointStatusCreating), ko)
+        code: rm.customSetOutput(desired, aws.String(svcsdk.EndpointStatusCreating), ko)
     fields:
       EndpointStatus:
         is_read_only: true
-        is_printable: true
+        print:
+          name: STATUS
         from:
           operation: DescribeEndpoint
           path: EndpointStatus
       FailureReason:
         is_read_only: true
-        is_printable: true
+        print:
+          name: FAILURE-REASON
+          priority: 1
         from:
           operation: DescribeEndpoint
           path: FailureReason
@@ -166,7 +169,8 @@ resources:
     fields:
       NotebookInstanceStatus:
         is_read_only: true
-        is_printable: true
+        print:
+          name: STATUS
         from:
             operation: DescribeNotebookInstance
             path: NotebookInstanceStatus
@@ -195,19 +199,21 @@ resources:
       delta_pre_compare:
         code: customSetDefaults(a, b)
       sdk_create_post_set_output:
-        code: rm.customSetOutput(r, aws.String(svcsdk.TrainingJobStatusInProgress), ko)
+        code: rm.customSetOutput(desired, aws.String(svcsdk.TrainingJobStatusInProgress), ko)
       sdk_delete_pre_build_request:
         template_path: training_job/sdk_delete_pre_build_request.go.tpl
     fields:
       TrainingJobStatus:
-          is_read_only: true
-          is_printable: true
-          from:
-            operation: DescribeTrainingJob
-            path: TrainingJobStatus
+        is_read_only: true
+        print:
+          name: STATUS
+        from:
+          operation: DescribeTrainingJob
+          path: TrainingJobStatus
       SecondaryStatus:
         is_read_only: true
-        is_printable: true
+        print:
+          name: SECONDARY-STATUS
         from:
           operation: DescribeTrainingJob
           path: SecondaryStatus
@@ -218,7 +224,9 @@ resources:
           path: DebugRuleEvaluationStatuses 
       FailureReason:
         is_read_only: true
-        is_printable: true
+        print:
+          name: FAILURE-REASON
+          priority: 1
         from:
           operation: DescribeTrainingJob
           path: FailureReason 
@@ -248,19 +256,22 @@ resources:
       sdk_delete_pre_build_request:
         template_path: processing_job/sdk_delete_pre_build_request.go.tpl
       sdk_create_post_set_output:
-        code: rm.customSetOutput(r, aws.String(svcsdk.ProcessingJobStatusInProgress), ko)
+        code: rm.customSetOutput(desired, aws.String(svcsdk.ProcessingJobStatusInProgress), ko)
       sdk_read_one_post_set_output:
         code: rm.customSetOutput(r, resp.ProcessingJobStatus, ko)
     fields:
       ProcessingJobStatus:
         is_read_only: true
-        is_printable: true
+        print:
+          name: STATUS
         from:
           operation: DescribeProcessingJob
           path: ProcessingJobStatus
       FailureReason:
         is_read_only: true
-        is_printable: true
+        print:
+          name: FAILURE-REASON
+          priority: 1
         from:
           operation: DescribeProcessingJob
           path: FailureReason 
@@ -290,19 +301,22 @@ resources:
       sdk_delete_pre_build_request:
         template_path: transform_job/sdk_delete_pre_build_request.go.tpl
       sdk_create_post_set_output:
-        code: rm.customSetOutput(r, aws.String(svcsdk.TransformJobStatusInProgress), ko)
+        code: rm.customSetOutput(desired, aws.String(svcsdk.TransformJobStatusInProgress), ko)
       sdk_read_one_post_set_output:
         code: rm.customSetOutput(r, resp.TransformJobStatus, ko)
     fields:
       TransformJobStatus:
-          is_read_only: true
-          is_printable: true
-          from:
-            operation: DescribeTransformJob
-            path: TransformJobStatus
+        is_read_only: true
+        print:
+          name: STATUS
+        from:
+          operation: DescribeTransformJob
+          path: TransformJobStatus
       FailureReason:
         is_read_only: true
-        is_printable: true
+        print:
+          name: FAILURE-REASON
+          priority: 1
         from:
           operation: DescribeTransformJob
           path: FailureReason
@@ -331,19 +345,22 @@ resources:
       sdk_delete_pre_build_request:
         template_path: hyper_parameter_tuning_job/sdk_delete_pre_build_request.go.tpl
       sdk_create_post_set_output:
-        code: rm.customSetOutput(r, aws.String(svcsdk.HyperParameterTuningJobStatusInProgress), ko)
+        code: rm.customSetOutput(desired, aws.String(svcsdk.HyperParameterTuningJobStatusInProgress), ko)
       sdk_read_one_post_set_output:
         code: rm.customSetOutput(r, resp.HyperParameterTuningJobStatus, ko)
     fields:
       HyperParameterTuningJobStatus:
         is_read_only: true
-        is_printable: true
+        print:
+          name: STATUS
         from:
           operation: DescribeHyperParameterTuningJob
           path: HyperParameterTuningJobStatus
       FailureReason:
         is_read_only: true
-        is_printable: true
+        print:
+          name: FAILURE-REASON
+          priority: 1
         from:
           operation: DescribeHyperParameterTuningJob
           path: FailureReason
@@ -470,7 +487,7 @@ resources:
         - UnrecognizedClientException
     hooks:
       sdk_create_post_set_output:
-        code: rm.customSetOutput(r, aws.String("Pending"), ko)
+        code: rm.customSetOutput(desired, aws.String("Pending"), ko)
       sdk_read_one_post_set_output:
         code: rm.customSetOutput(r, resp.MonitoringScheduleStatus, ko)
       sdk_update_pre_build_request:
@@ -482,13 +499,16 @@ resources:
     fields:
       MonitoringScheduleStatus:
         is_read_only: true
-        is_printable: true
+        print:
+          name: STATUS
         from:
           operation: DescribeMonitoringSchedule
           path: MonitoringScheduleStatus
       FailureReason:
         is_read_only: true
-        is_printable: true
+        print:
+          name: FAILURE-REASON
+          priority: 1
         from:
           operation: DescribeMonitoringSchedule
           path: FailureReason
