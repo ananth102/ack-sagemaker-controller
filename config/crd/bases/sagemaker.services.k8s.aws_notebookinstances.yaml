@@ -196,6 +196,9 @@ spec:
                   - type
                   type: object
                 type: array
+              notebookInstanceStatus:
+                description: The status of the notebook instance.
+                type: string
             required:
             - ackResourceMetadata
             - conditions

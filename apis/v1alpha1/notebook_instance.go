@@ -110,6 +110,8 @@ type NotebookInstanceStatus struct {
 	// the various terminal states of the CR and its backend AWS service API
 	// resource
 	Conditions []*ackv1alpha1.Condition `json:"conditions"`
+	// The status of the notebook instance.
+	NotebookInstanceStatus *string `json:"notebookInstanceStatus,omitempty"`
 }
 
 // NotebookInstance is the Schema for the NotebookInstances API

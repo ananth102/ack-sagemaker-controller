@@ -22,6 +22,8 @@ operations:
   StopHyperParameterTuningJob:
     operation_type: Delete
     resource_name: HyperParameterTuningJob
+  # DescribeNotebookInstance:
+  #   set_output_custom_method_name: customDescribeNotebookInstanceSetOutput
 resources:
   Model:
     hooks:
@@ -153,17 +155,21 @@ resources:
     hooks:
       sdk_update_pre_build_request:
         code: rm.customUpdate(ctx,desired,latest,delta)
-      sdk_create_post_set_output:
-        code: rm.customSetOutput(r, aws.String(svcsdk.NotebookInstanceStatusPending),ko)
+      # sdk_create_post_set_output:
+      #   code: rm.customSetOutput(r, aws.String(svcsdk.NotebookInstanceStatusPending),ko)
       sdk_delete_pre_build_request:
         code: rm.customDelete(ctx,r)
+      sdk_update_post_request:
+        code: rm.customPostUpdate(ctx,desired)
       delta_pre_compare:
         code: customSetDefaults(a, b)
     fields:
-      woof:
-        is_read_only: false
+      NotebookInstanceStatus:
+        is_read_only: true
         is_printable: true
-
+        from:
+            operation: DescribeNotebookInstance
+            path: NotebookInstanceStatus
 
   TrainingJob:
     exceptions:
