@@ -125,6 +125,11 @@ func (rm *resourceManager) sdkFind(
 	} else {
 		ko.Spec.NotebookInstanceName = nil
 	}
+	if resp.NotebookInstanceStatus != nil {
+		ko.Status.NotebookInstanceStatus = resp.NotebookInstanceStatus
+	} else {
+		ko.Status.NotebookInstanceStatus = nil
+	}
 	if resp.RoleArn != nil {
 		ko.Spec.RoleARN = resp.RoleArn
 	} else {
@@ -205,7 +210,6 @@ func (rm *resourceManager) sdkCreate(
 
 	rm.setStatusDefaults(ko)
 
-	rm.customSetOutput(r, aws.String(svcsdk.NotebookInstanceStatusPending), ko)
 	return &resource{ko}, nil
 }
 
@@ -294,6 +298,7 @@ func (rm *resourceManager) sdkUpdate(
 	}
 
 	_, respErr := rm.sdkapi.UpdateNotebookInstanceWithContext(ctx, input)
+	rm.customPostUpdate(ctx, desired)
 	rm.metrics.RecordAPICall("UPDATE", "UpdateNotebookInstance", respErr)
 	if respErr != nil {
 		return nil, respErr
