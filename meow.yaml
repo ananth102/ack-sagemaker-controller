@@ -3,7 +3,6 @@ kind: NotebookInstance
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.0
-    woof: "True"
   name: test91
   
 spec:

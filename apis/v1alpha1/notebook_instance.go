@@ -20,7 +20,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// NotebookInstanceSpec defines the desired state of NotebookInstance
+// NotebookInstanceSpec defines the desired state of NotebookInstance.
 type NotebookInstanceSpec struct {
 	// A list of Elastic Inference (EI) instance types to associate with this notebook
 	// instance. Currently, only one instance type can be associated with a notebook
@@ -117,6 +117,7 @@ type NotebookInstanceStatus struct {
 // NotebookInstance is the Schema for the NotebookInstances API
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="STATUS",type=string,priority=0,JSONPath=`.status.notebookInstanceStatus`
 type NotebookInstance struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

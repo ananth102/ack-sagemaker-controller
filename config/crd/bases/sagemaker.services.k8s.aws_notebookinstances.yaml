@@ -16,7 +16,11 @@ spec:
     singular: notebookinstance
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .status.notebookInstanceStatus
+      name: STATUS
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: NotebookInstance is the Schema for the NotebookInstances API
@@ -34,7 +38,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: NotebookInstanceSpec defines the desired state of NotebookInstance
+            description: NotebookInstanceSpec defines the desired state of NotebookInstance.
             properties:
               acceleratorTypes:
                 description: A list of Elastic Inference (EI) instance types to associate
