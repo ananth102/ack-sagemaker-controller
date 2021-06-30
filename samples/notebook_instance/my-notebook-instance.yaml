@@ -1,0 +1,20 @@
+apiVersion: sagemaker.services.k8s.aws/v1alpha1
+kind: NotebookInstance
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.4.0
+  name: my-notebook
+  
+spec:
+  instanceType: ml.t2.medium
+  notebookInstanceName: my-notebook
+  roleARN: <YOUR SAGEMAKER ROLE ARN>
+  volumeSizeInGB: 6  
+  directInternetAccess: Enabled
+  rootAccess: Enabled
+  tags: [
+    {
+      "Key": "Development"
+      "Value": "Kubernetes"
+    }
+  ]
