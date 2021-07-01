@@ -9,7 +9,7 @@ spec:
   instanceType: ml.t2.medium
   notebookInstanceName: test91
   roleARN: arn:aws:iam::475866477710:role/service-role/AmazonSageMakerServiceCatalogProductsUseRole
-  volumeSizeInGB: 6
+  volumeSizeInGB: 8
   
   # directInternetAccess: Enabled
   # rootAccess: Enabled

@@ -22,6 +22,8 @@ operations:
   StopHyperParameterTuningJob:
     operation_type: Delete
     resource_name: HyperParameterTuningJob
+  DescribeNotebookInstance:
+    set_output_custom_method_name: customDescribeNotebookSetOutput
 resources:
   Model:
     hooks:
