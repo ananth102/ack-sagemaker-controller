@@ -3,11 +3,11 @@ kind: NotebookInstance
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.0
-  name: test91
+  name: test51
   
 spec:
   instanceType: ml.t2.medium
-  notebookInstanceName: test91
+  notebookInstanceName: test51
   roleARN: arn:aws:iam::475866477710:role/service-role/AmazonSageMakerServiceCatalogProductsUseRole
   volumeSizeInGB: 6
   

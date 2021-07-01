@@ -30,15 +30,17 @@ from e2e.replacement_values import REPLACEMENT_VALUES
 from e2e.bootstrap_resources import get_bootstrap_resources
 from e2e.common import config as cfg
 from time import sleep
+import random
 
 RESOURCE_PLURAL = "notebookinstances"
-RESOURCE_BASE_NAME = "notebookInstance"
+RESOURCE_PREFIX = "nb"
 RESOURCE_SPEC_FILE = "notebook_instance"
 
 
 @pytest.fixture(scope="function")
 def notebook_instance():
-    resource_name = random_suffix_name(RESOURCE_BASE_NAME, 32)
+    resource_name = RESOURCE_PREFIX + str(random.randint(0, 1000))
+    print(resource_name)
     replacements = REPLACEMENT_VALUES.copy()
     replacements["NOTEBOOK_INSTANCE_NAME"] = resource_name
     reference, spec, resource = create_sagemaker_resource(
@@ -56,7 +58,7 @@ def notebook_instance():
 
 def get_notebook_instance(notebook_instance_name: str):
     try:
-        desired_notebook_instance = sagemaker_client.describe_notebook_instance(NotebookInstanceName=notebook_instance_name)
+        desired_notebook_instance = sagemaker_client().describe_notebook_instance(NotebookInstanceName=notebook_instance_name)
         return desired_notebook_instance
     except botocore.exceptions.ClientError as error:
         logging.error(
@@ -66,14 +68,16 @@ def get_notebook_instance(notebook_instance_name: str):
 
 def get_notebook_instance_sagemaker_status(notebook_instance_name: str):
     notebook_instance = get_notebook_instance(notebook_instance_name)
-    assert notebook_instance not None
+    assert notebook_instance is not None
+    print("SAGEMAKER STATUS",notebook_instance_name,notebook_instance["NotebookInstanceStatus"])
     return notebook_instance["NotebookInstanceStatus"]
 
 def get_notebook_instance_resource_status(reference: k8s.CustomResourceReference):
     resource = k8s.get_resource(reference)
     assert resource is not None
-    assert "NotebookInstanceStatus" in resource["status"]
-    return resource["status"]["NotebookInstanceStatus"]
+    assert "notebookInstanceStatus" in resource["status"]
+    print("ACK STATUS","woof",resource["status"]["notebookInstanceStatus"])
+    return resource["status"]["notebookInstanceStatus"]
 
 @pytest.mark.canary
 @service_marker
@@ -99,11 +103,12 @@ class TestNotebookInstance:
             notebook_instance_name
         )
     def _assert_notebook_status_in_sync(self, notebook_instance_name, reference, expected_status):
-        assert(self._wait_resource_notebook_status(reference,expected_status)
-        == self._wait_sagemaker_notebook_status(notebook_instance_name,expected_status)
+        assert(
+            self._wait_sagemaker_notebook_status(notebook_instance_name,expected_status)
+        == self._wait_resource_notebook_status(reference,expected_status)
         == expected_status
         )
-    def testUpdateAndDelete():
+    def testUpdateAndDelete(self,notebook_instance):
         (reference, resource, spec) = notebook_instance
         assert k8s.get_resource_exists(reference)
 
@@ -111,9 +116,10 @@ class TestNotebookInstance:
         assert notebook_instance_name is not None
 
         notebook_description = get_notebook_instance(notebook_instance_name)
+        print(notebook_description)
         assert notebook_description["NotebookInstanceStatus"] == "Pending"
 
-        self._assert_training_status_in_sync(notebook_instance_name,reference,"InService")
+        self._assert_notebook_status_in_sync(notebook_instance_name,reference,"InService")
 
         #Update Notebook
         spec["spec"]["volumeSizeInGB"] = 7
