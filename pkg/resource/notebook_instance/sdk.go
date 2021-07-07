@@ -157,11 +157,6 @@ func (rm *resourceManager) sdkFind(
 	}
 
 	rm.setStatusDefaults(ko)
-	// custom set output from response
-	ko, err = rm.customDescribeNotebookSetOutput(ctx, r, resp, ko)
-	if err != nil {
-		return nil, err
-	}
 	return &resource{ko}, nil
 }
 
@@ -307,7 +302,12 @@ func (rm *resourceManager) sdkUpdate(
 	rlog := ackrtlog.FromContext(ctx)
 	exit := rlog.Trace("rm.sdkUpdate")
 	defer exit(err)
+	if *latest.ko.Status.NotebookInstanceStatus == svcsdk.NotebookInstanceStatusUpdating {
+		rm.customPostUpdate(ctx, desired, err, latest)
+		return nil, requeueWaitWhileUpdating
+	}
 	rm.customUpdate(ctx, desired, latest, delta)
+
 	input, err := rm.newUpdateRequestPayload(ctx, desired)
 	if err != nil {
 		return nil, err
@@ -316,7 +316,10 @@ func (rm *resourceManager) sdkUpdate(
 	var resp *svcsdk.UpdateNotebookInstanceOutput
 	_ = resp
 	resp, err = rm.sdkapi.UpdateNotebookInstanceWithContext(ctx, input)
-	rm.customPostUpdate(ctx, desired)
+	rm.customPostUpdate(ctx, desired, err, latest)
+	if *latest.ko.Status.NotebookInstanceStatus == svcsdk.NotebookInstanceStatusUpdating {
+		return nil, requeueWaitWhileUpdating
+	}
 	rm.metrics.RecordAPICall("UPDATE", "UpdateNotebookInstance", err)
 	if err != nil {
 		return nil, err
@@ -491,8 +494,13 @@ func (rm *resourceManager) updateConditions(
 			recoverableCondition.Message = nil
 		}
 	}
-	// Required to avoid the "declared but not used" error in the default case
-	_ = syncCondition
+	if syncCondition == nil && onSuccess {
+		syncCondition = &ackv1alpha1.Condition{
+			Type:   ackv1alpha1.ConditionTypeResourceSynced,
+			Status: corev1.ConditionTrue,
+		}
+		ko.Status.Conditions = append(ko.Status.Conditions, syncCondition)
+	}
 	if terminalCondition != nil || recoverableCondition != nil || syncCondition != nil {
 		return &resource{ko}, true // updated
 	}
