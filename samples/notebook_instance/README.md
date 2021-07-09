@@ -2,6 +2,8 @@
 
 ## Prerequisites
 
+### Common
+
 This sample assumes that you have completed the [common prerequisites](/samples/README.md).
 
 ### Update the Notebook Instance Specification
@@ -19,7 +21,7 @@ The Notebook Instance will start at the Pending state and will transition into I
 $ kubectl apply -f my-notebook-instance.yaml
 ```
 
-### Lists Notebook Instances
+### List Notebook Instances
 This command lists all the notebook instances created using the ACK controller.
 ```
 $ kubectl get NotebookInstance
@@ -32,9 +34,20 @@ $ kubectl describe NotebookInstance my-notebook
 ```
 
 ### Update a Notebook Instance
-This commands updates the Notebook Instance with the updated spec provided in my-notebook-instance.yaml. The update command retains the state the controller was previously in. If the update command was called while the controller was in the InService state, it will end up in the InService state after the update. If the update command was called while the controller was in the Stopped/Stopping state, it will end up in the Stopped state after the update.
+This commands updates the Notebook Instance with the updated spec provided in my-notebook-instance.yaml. The update command sets the Notebook to the InService state by default but a annotation can be applied to make it stop after updating.
 ```
 $ kubectl apply -f my-notebook-instance.yaml
+```
+
+Applying this command after the command above will make the notebook stop. Note: `stop_after_update` has to be set to "enabled".
+```
+$ kubectl annotate NotebookInstance my-notebook stop_after_update=enabled
+```
+
+Applying this command will remove the annotation shown above and will start the notebook after it has been updated.
+
+```
+$ kubectl annotate NotebookInstance my-notebook stop_after_update-
 ```
 
 
