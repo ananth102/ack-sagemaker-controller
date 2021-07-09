@@ -39,7 +39,7 @@ RESOURCE_SPEC_FILE = "notebook_instance"
 
 @pytest.fixture(scope="function")
 def notebook_instance():
-    resource_name = RESOURCE_PREFIX + str(random.randint(0, 1000))
+    resource_name = RESOURCE_PREFIX + str(random.randint(0, 10000))
     print(resource_name)
     replacements = REPLACEMENT_VALUES.copy()
     replacements["NOTEBOOK_INSTANCE_NAME"] = resource_name
@@ -105,7 +105,7 @@ class TestNotebookInstance:
     def _assert_notebook_status_in_sync(self, notebook_instance_name, reference, expected_status):
         assert(
             self._wait_sagemaker_notebook_status(notebook_instance_name,expected_status)
-        # == self._wait_resource_notebook_status(reference,expected_status)
+        == self._wait_resource_notebook_status(reference,expected_status)
         == expected_status
         )
     def testUpdateAndDelete(self,notebook_instance):
@@ -133,8 +133,8 @@ class TestNotebookInstance:
         assert(latest_notebook["VolumeSizeInGB"] == 7)
 
         # Delete the k8s resource.
-        _, deleted = k8s.delete_custom_resource(reference, 3, 10)
-        assert deleted
+        _, deleted = k8s.delete_custom_resource(reference, 11, 30) # Notebook takes a while to delete because it has to be stopped first and because of the exponential backoff that occurs while deleting it
+        assert deleted is True
 
 
 
