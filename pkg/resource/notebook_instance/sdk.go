@@ -157,6 +157,77 @@ func (rm *resourceManager) sdkFind(
 	}
 
 	rm.setStatusDefaults(ko)
+	notebook_state := *ko.Status.NotebookInstanceStatus // Get the Notebook State
+	/*
+		if notebook_state == svcsdk.NotebookInstanceStatusUpdating {
+			notebook_annotations["Updating"] = "TRUE"
+			r.ko.SetAnnotations(notebook_annotations)
+		}
+		for _, w := range ko.Status.Conditions {
+			fmt.Println("\n \n", notebook_state, " ", w, "\n \n")
+		} */
+	/*
+		If the notebook is in the stopped state there can be three conditions:
+		A. Notebook is stopping for the update - In this case ackv1alpha1.ConditionTypeResourceSynced will be true and the notebook will update.
+		B. The notebook has updated - In this case ackv1alpha1.ConditionTypeResourceSynced will be false and the notebook will start.
+		C. The user has stopped the notebook -  In this case ackv1alpha1.ConditionTypeResourceSynced will be true and the notebook will stay stopped.
+	*/
+	if notebook_state == svcsdk.NotebookInstanceStatusStopped {
+		for _, w := range ko.Status.Conditions {
+			if w.Type == ackv1alpha1.ConditionTypeResourceSynced {
+				if w.Status == corev1.ConditionFalse {
+					/* fmt.Println("\n \n", notebook_state, "   meyooooww   ", w, "\n \n") */
+					val, ok := r.ko.Annotations["stop_after_update"]
+					/* If there is an annotation to stop the notebook we will just keep it in the stop state and finish reconciliation. */
+					if ok && strings.ToLower(val) == "enabled" {
+						rm.customSetOutputReadOne(r, aws.String("Stopped"), r.ko)
+						/* Finishes reconciliation, code above does not work if ko.Status.Condition is set */
+						for _, w := range ko.Status.Conditions {
+							if w.Type == ackv1alpha1.ConditionTypeResourceSynced {
+								w.Status = corev1.ConditionTrue
+								break
+							}
+
+						}
+					} else {
+						/*This code starts the notebook and finishes reconciliation*/
+						nb_input := svcsdk.StartNotebookInstanceInput{}
+						nb_input.NotebookInstanceName = &r.ko.Name
+						rm.sdkapi.StartNotebookInstance(&nb_input)
+						rm.customSetOutputReadOne(r, aws.String("Pending"), r.ko)
+						for _, w := range ko.Status.Conditions {
+							if w.Type == ackv1alpha1.ConditionTypeResourceSynced {
+								w.Status = corev1.ConditionTrue
+								break
+							}
+
+						}
+					}
+
+					break
+				}
+			}
+		}
+
+	}
+	/*
+		My ec2 instance times out freuqently so I've included this, will take it out for the PR.
+		This piece of code performs the same functionality as rm.customSetOutputReadOne and the for loop following that.
+	*/
+	if notebook_state == svcsdk.NotebookInstanceStatusPending || notebook_state == svcsdk.NotebookInstanceStatusInService {
+		for _, w := range ko.Status.Conditions {
+			if w.Type == ackv1alpha1.ConditionTypeResourceSynced {
+				w.Status = corev1.ConditionTrue
+				break
+			}
+
+		}
+
+	}
+	// for _, w := range ko.Status.Conditions {
+	/* fmt.Println("\n \n", notebook_state, " PR2 ", w, "\n \n") */
+	// }
+
 	return &resource{ko}, nil
 }
 
@@ -302,12 +373,11 @@ func (rm *resourceManager) sdkUpdate(
 	rlog := ackrtlog.FromContext(ctx)
 	exit := rlog.Trace("rm.sdkUpdate")
 	defer exit(err)
+	/* This prevents the notebook from finishing reconciliation after it reaches the Updating state */
 	if *latest.ko.Status.NotebookInstanceStatus == svcsdk.NotebookInstanceStatusUpdating {
-		rm.customPostUpdate(ctx, desired, err, latest)
 		return nil, requeueWaitWhileUpdating
 	}
-	rm.customUpdate(ctx, desired, latest, delta)
-
+	rm.customPreUpdate(ctx, desired, latest, delta)
 	input, err := rm.newUpdateRequestPayload(ctx, desired)
 	if err != nil {
 		return nil, err
@@ -316,7 +386,7 @@ func (rm *resourceManager) sdkUpdate(
 	var resp *svcsdk.UpdateNotebookInstanceOutput
 	_ = resp
 	resp, err = rm.sdkapi.UpdateNotebookInstanceWithContext(ctx, input)
-	rm.customPostUpdate(ctx, desired, err, latest)
+	/* We need this call below in case update succeeds Instantaneously */
 	if *latest.ko.Status.NotebookInstanceStatus == svcsdk.NotebookInstanceStatusUpdating {
 		return nil, requeueWaitWhileUpdating
 	}
@@ -329,6 +399,18 @@ func (rm *resourceManager) sdkUpdate(
 	ko := desired.ko.DeepCopy()
 
 	rm.setStatusDefaults(ko)
+	/*
+		This sets resource synced to false so the controller Requeues after it reaches the stopped state.
+		If we dont do this we would have to poll Sagemaker once per second.
+	*/
+	rm.customSetOutputUpdate(desired, ko.Status.NotebookInstanceStatus, ko)
+	for _, w := range ko.Status.Conditions {
+		if w.Type == ackv1alpha1.ConditionTypeResourceSynced {
+			w.Status = corev1.ConditionFalse
+			break
+		}
+
+	}
 	return &resource{ko}, nil
 }
 
@@ -494,13 +576,8 @@ func (rm *resourceManager) updateConditions(
 			recoverableCondition.Message = nil
 		}
 	}
-	if syncCondition == nil && onSuccess {
-		syncCondition = &ackv1alpha1.Condition{
-			Type:   ackv1alpha1.ConditionTypeResourceSynced,
-			Status: corev1.ConditionTrue,
-		}
-		ko.Status.Conditions = append(ko.Status.Conditions, syncCondition)
-	}
+	// Required to avoid the "declared but not used" error in the default case
+	_ = syncCondition
 	if terminalCondition != nil || recoverableCondition != nil || syncCondition != nil {
 		return &resource{ko}, true // updated
 	}
@@ -531,7 +608,8 @@ func (rm *resourceManager) terminalAWSError(err error) bool {
 		"InvalidQueryParameter",
 		"MalformedQueryString",
 		"InvalidAction",
-		"UnrecognizedClientException":
+		"UnrecognizedClientException",
+		"VolumeModificationRateExceeded":
 		return true
 	default:
 		return false

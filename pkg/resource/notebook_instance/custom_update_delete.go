@@ -3,81 +3,54 @@ package notebook_instance
 import (
 	"context"
 	"fmt"
-	"strings"
 
+	ackv1alpha1 "github.com/aws-controllers-k8s/runtime/apis/core/v1alpha1"
 	ackcompare "github.com/aws-controllers-k8s/runtime/pkg/compare"
 	svcsdk "github.com/aws/aws-sdk-go/service/sagemaker"
 )
 
 /*
 This function stops the notebook instance(if its running) before the update build request.
-It also keeps track of whether the notebook was stopped beforehand.
 */
-func (rm *resourceManager) customUpdate(
+func (rm *resourceManager) customPreUpdate(
 	ctx context.Context,
 	desired *resource,
 	latest *resource,
 	delta *ackcompare.Delta,
 ) {
 
-	// delta.
-
-	desired_ptr := rm.concreteResource(desired)
-
 	latestStatus := *latest.ko.Status.NotebookInstanceStatus
-	obj := desired_ptr.RuntimeMetaObject()
-	curr := obj.GetAnnotations()
-	fmt.Println(" \n \n First check \n", curr)
+	// obj := desired_ptr.RuntimeMetaObject()
+	// curr := obj.GetAnnotations()
+	curr_annotations := desired.ko.GetAnnotations()
+	fmt.Println(" \n \n Checking desired annotations\n", curr_annotations)
+	curr_annotations[ackv1alpha1.AnnotationAdopted] = "false"
+	desired.ko.SetAnnotations(curr_annotations)
+	desired.ko.Annotations["test1ddddd"] = "true"
+	// SetMetaDataAnnotation()
+	fmt.Println(" \n \n {ttt} Checking desired annotations 2\n", desired.ko.GetAnnotations())
+
+	// curr_latest_annotations := latest.ko.GetAnnotations()
+	// fmt.Println(" \n \n Checking latest annotations \n", curr_latest_annotations)
+	// curr_latest_annotations["test"] = "TRUE"
+	// latest.ko.SetAnnotations(curr_latest_annotations)
+
 	if &latestStatus == nil {
 		return
 	}
 	if latestStatus != svcsdk.NotebookInstanceStatusStopped && latestStatus != svcsdk.NotebookInstanceStatusFailed && latestStatus != svcsdk.NotebookInstanceStatusStopping {
-		if curr == nil {
-			curr = make(map[string]string)
-		}
-		curr["stopped_by_ack"] = "True"
-		obj.SetAnnotations(curr)
+		// if curr == nil {
+		// 	curr = make(map[string]string)
+		// }
+		curr_annotations["stopped_by_ack"] = "True"
+		desired.ko.SetAnnotations(curr_annotations)
+		// curr["stopped_by_ack"] = "True"
+		// obj.SetAnnotations(curr)
 		nb_input := svcsdk.StopNotebookInstanceInput{}
 		nb_input.NotebookInstanceName = &desired.ko.Name
 		rm.sdkapi.StopNotebookInstance(&nb_input)
-		fmt.Println(" \n \n Second check \n", curr)
+		fmt.Println(" \n \n Second check \n", desired.ko.GetAnnotations())
 	}
-}
-
-/*
-This function starts the notebook instance after the update as long as the annotation desired.ko.Annotations["stopped_by_ACK"] is set to true.
-*/
-
-func (rm *resourceManager) customPostUpdate(ctx context.Context,
-	desired *resource, err error, latest *resource) {
-
-	if err != nil && *latest.ko.Status.NotebookInstanceStatus != svcsdk.NotebookInstanceStatusUpdating {
-		return
-	}
-
-	val, ok := desired.ko.Annotations["stop_after_update"]
-
-	nb_input := svcsdk.StartNotebookInstanceInput{}
-	nb_input.NotebookInstanceName = &desired.ko.Name
-	fmt.Println("\n  PRINT WORKSs  ", ok, " \n \n")
-	if ok {
-		santizedStop := strings.ToLower(val)
-		if santizedStop != "enabled" {
-			nb_input := svcsdk.StartNotebookInstanceInput{}
-			nb_input.NotebookInstanceName = &desired.ko.Name
-			rm.sdkapi.StartNotebookInstance(&nb_input)
-		} else {
-			return
-		}
-
-	} else {
-		fmt.Println("\n \n INSIDE HERE \n \n")
-		nb_input := svcsdk.StartNotebookInstanceInput{}
-		nb_input.NotebookInstanceName = &desired.ko.Name
-		rm.sdkapi.StartNotebookInstance(&nb_input)
-		return
-	}
-
 }
 
 /*
@@ -99,25 +72,3 @@ func (rm *resourceManager) customDelete(ctx context.Context,
 		rm.sdkapi.StopNotebookInstance(&nb_input)
 	}
 }
-
-// func (rm *resourceManager) CustomUpdateConditions(
-// 	ko *svcapitypes.NotebookInstance,
-// 	r *resource,
-// 	err error,
-// ) bool {
-
-// 	//First check if the annotation exists
-// 	//If it does exist and is not enabled and notebook is not in pending or inservice return false
-// 	//otherwise return true
-// 	val, ok := r.ko.Annotations["stop_after_update"]
-// 	if ok && val != "enabled" && !(*ko.Status.NotebookInstanceStatus != svcsdk.NotebookInstanceStatusPending && *ko.Status.NotebookInstanceStatus != svcsdk.NotebookInstanceStatusInService) {
-// 		return false
-// 	}
-// 	if !ok {
-// 		if !(*ko.Status.NotebookInstanceStatus != svcsdk.NotebookInstanceStatusPending && *ko.Status.NotebookInstanceStatus != svcsdk.NotebookInstanceStatusInService) {
-// 			return false
-// 		}
-// 	}
-// 	return true
-
-// }

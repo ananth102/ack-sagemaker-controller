@@ -136,8 +136,8 @@ resources:
           operation: DescribeEndpoint
           path: ProductionVariants
   NotebookInstance:
-    reconcile:
-      requeue_on_success_seconds: 150
+    # reconcile:
+    #   requeue_on_success_seconds: 150
     exceptions:
       errors:
           404:
@@ -157,6 +157,7 @@ resources:
         - MalformedQueryString
         - InvalidAction
         - UnrecognizedClientException
+        - VolumeModificationRateExceeded
     hooks:
       sdk_update_pre_build_request:
         template_path: notebook_instance/sdk_update_pre_build_request.go.tpl
@@ -164,8 +165,12 @@ resources:
         code: rm.customDelete(ctx,r)
       sdk_update_post_request:
         template_path: notebook_instance/sdk_update_post_build_request.go.tpl
+      sdk_update_post_set_output:
+        template_path: notebook_instance/sdk_update_post_set_output.tpl
       delta_pre_compare:
         code: customSetDefaults(a, b)
+      sdk_read_one_post_set_output: 
+        template_path: notebook_instance/sdk_read_one_post_set_output.tpl
     fields:
       NotebookInstanceStatus:
         is_read_only: true

@@ -1,5 +1,5 @@
+/* This prevents the notebook from finishing reconciliation after it reaches the Updating state */
 if *latest.ko.Status.NotebookInstanceStatus == svcsdk.NotebookInstanceStatusUpdating {
-		rm.customPostUpdate(ctx, desired, err, latest)
 		return nil, requeueWaitWhileUpdating
 	}
-rm.customUpdate(ctx, desired, latest, delta)
+rm.customPreUpdate(ctx, desired, latest, delta)
