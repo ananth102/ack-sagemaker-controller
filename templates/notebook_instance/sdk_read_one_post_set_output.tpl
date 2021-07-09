@@ -1,3 +1,4 @@
+	notebook_state := *ko.Status.NotebookInstanceStatus // Get the Notebook State
 	/*
 		If the notebook is in the stopped state there can be three conditions:
 		A. Notebook is stopping for the update - In this case w.Message will be either nothing or  "DONE_UPDATING" and the notebook will update.

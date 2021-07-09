@@ -158,7 +158,6 @@ func (rm *resourceManager) sdkFind(
 
 	rm.setStatusDefaults(ko)
 	notebook_state := *ko.Status.NotebookInstanceStatus // Get the Notebook State
-
 	/*
 		If the notebook is in the stopped state there can be three conditions:
 		A. Notebook is stopping for the update - In this case w.Message will be either nothing or  "DONE_UPDATING" and the notebook will update.
@@ -219,10 +218,6 @@ func (rm *resourceManager) sdkFind(
 			}
 		}
 	}
-	// for _, w := range ko.Status.Conditions {
-	// 	fmt.Println("\n \n", notebook_state, " PR2 ", w, "\n \n")
-	// }
-
 	return &resource{ko}, nil
 }
 
@@ -284,9 +279,8 @@ func (rm *resourceManager) sdkCreate(
 		ko.Status.ACKResourceMetadata.ARN = &arn
 	}
 
-	rm.customSetOutput(desired, aws.String(svcsdk.NotebookInstanceStatusPending), ko)
-
 	rm.setStatusDefaults(ko)
+	rm.customSetOutput(desired, aws.String(svcsdk.NotebookInstanceStatusPending), ko)
 	return &resource{ko}, nil
 }
 
@@ -396,7 +390,6 @@ func (rm *resourceManager) sdkUpdate(
 	ko := desired.ko.DeepCopy()
 
 	rm.setStatusDefaults(ko)
-
 	/*
 		This sets resource synced to false so the controller Requeues after it reaches the stopped state.
 		If we dont do this we would have to poll Sagemaker once per second.

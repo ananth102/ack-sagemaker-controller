@@ -13,5 +13,5 @@ spec:
   roleARN: arn:aws:iam::475866477710:role/service-role/AmazonSageMakerServiceCatalogProductsUseRole
   volumeSizeInGB: 5
   directInternetAccess: Enabled
-  rootAccess: Disabled
+  rootAccess: Enabled
 

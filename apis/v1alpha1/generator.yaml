@@ -136,8 +136,6 @@ resources:
           operation: DescribeEndpoint
           path: ProductionVariants
   NotebookInstance:
-    # reconcile:
-    #   requeue_on_success_seconds: 150
     exceptions:
       errors:
           404:
@@ -171,6 +169,8 @@ resources:
         code: customSetDefaults(a, b)
       sdk_read_one_post_set_output: 
         template_path: notebook_instance/sdk_read_one_post_set_output.tpl
+      sdk_create_post_set_output:
+        code: rm.customSetOutput(desired, aws.String(svcsdk.NotebookInstanceStatusPending), ko)
     fields:
       NotebookInstanceStatus:
         is_read_only: true
