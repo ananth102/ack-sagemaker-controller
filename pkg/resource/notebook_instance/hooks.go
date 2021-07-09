@@ -11,8 +11,4 @@ var (
 		errors.New("Update is in progress."),
 		ackrequeue.DefaultRequeueAfterDuration,
 	)
-	requeueWaitWhileStopped = ackrequeue.NeededAfter(
-		errors.New("Update is in progress."),
-		ackrequeue.DefaultRequeueAfterDuration,
-	)
 )
