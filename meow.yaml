@@ -1,17 +1,12 @@
-apiVersion: sagemaker.services.k8s.aws/v1alpha1
-kind: NotebookInstance
+apiVersion: services.k8s.aws/v1alpha1
+kind: AdoptedResource
 metadata:
-  annotations:
-    controller-gen.kubebuilder.io/version: v0.4.0
-    # stop_after_update: enabled
-  name: test221
-  
-  
+  name: grrrrrrr
 spec:
-  instanceType: ml.t2.medium
-  notebookInstanceName: test221
-  roleARN: arn:aws:iam::475866477710:role/service-role/AmazonSageMakerServiceCatalogProductsUseRole
-  volumeSizeInGB: 5
-  directInternetAccess: Enabled
-  rootAccess: Enabled
+  aws:
+    arn: arn:aws:sagemaker:us-east-2:475866477710:notebook-instance/grrrrrrr
+    nameOrID: grrrrrrr
+  kubernetes:
+    kind: NotebookInstance
+    group: sagemaker.services.k8s.aws
 
