@@ -4,12 +4,12 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.0
     # stop_after_update: enabled
-  name: test221
+  name: test227
   
   
 spec:
   instanceType: ml.t2.medium
-  notebookInstanceName: test221
+  notebookInstanceName: test227
   roleARN: arn:aws:iam::475866477710:role/service-role/AmazonSageMakerServiceCatalogProductsUseRole
   volumeSizeInGB: 5
   directInternetAccess: Enabled
