@@ -22,6 +22,14 @@ operations:
   StopHyperParameterTuningJob:
     operation_type: Delete
     resource_name: HyperParameterTuningJob
+  DescribeModelBiasJobDefinition:
+    primary_identifier_field_name: JobDefinitionName
+  DescribeModelExplainabilityJobDefinition:
+    primary_identifier_field_name: JobDefinitionName
+  DescribeModelQualityJobDefinition:
+    primary_identifier_field_name: JobDefinitionName
+  DescribeDataQualityJobDefinition:
+    primary_identifier_field_name: JobDefinitionName
 resources:
   Model:
     hooks:
@@ -399,6 +407,52 @@ resources:
     hooks:
       delta_pre_compare:
         code: customSetDefaults(a, b)
+  NotebookInstanceLifecycleConfig:
+    exceptions:
+      errors:
+          404:
+            code: ResourceNotFound
+      terminal_codes:
+        - ResourceLimitExceeded
+        - ResourceNotFound
+        - ResourceInUse
+        - OptInRequired
+        - InvalidParameterCombination
+        - InvalidParameterValue
+        - MissingParameter
+        - MissingAction
+        - InvalidQueryParameter
+        - MalformedQueryString
+        - InvalidAction
+        - UnrecognizedClientException
+  Domain:
+    exceptions:
+      errors:
+          404:
+            code: ResourceNotFound
+      terminal_codes:
+        - ResourceLimitExceeded
+        - ResourceNotFound
+        - ResourceInUse
+        - OptInRequired
+        - InvalidParameterCombination
+        - InvalidParameterValue
+        - MissingParameter
+        - MissingAction
+        - InvalidQueryParameter
+        - MalformedQueryString
+        - InvalidAction
+        - UnrecognizedClientException
+    hooks:
+      sdk_create_pre_set_output:
+       code: rm.customDomainPreSetOutput(resp, ko)
+    fields:
+      DomainId:
+       from:
+         path: DomainId
+         operation: DescribeDomain
+       
+
   ModelExplainabilityJobDefinition:
     exceptions:
       errors:
@@ -519,7 +573,7 @@ ignore:
       - Context
       # - DataQualityJobDefinition
       - DeviceFleet
-      - Domain
+      # - Domain
       - EdgePackagingJob
       # - EndpointConfig
       # - Endpoint

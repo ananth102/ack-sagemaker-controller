@@ -1,0 +1,14 @@
+apiVersion: sagemaker.services.k8s.aws/v1alpha1
+kind: Domain
+metadata:
+  name: domair
+spec:
+  domainName: domair
+  authMode: IAM
+  defaultUserSettings:
+    executionRole: arn:aws:iam::475866477710:role/ack-sagemaker-execution-role
+  subnetIDs:
+  - subnet-278aae6b
+  - subnet-fa9c1a91
+  - subnet-7437cb09
+  vpcID: vpc-6aec7201

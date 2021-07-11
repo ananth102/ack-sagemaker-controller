@@ -31,7 +31,6 @@ func newResourceDelta(
 		delta.Add("", a, b)
 		return delta
 	}
-	customSetDefaults(a, b)
 
 	if ackcompare.HasNilDifference(a.ko.Spec.NotebookInstanceLifecycleConfigName, b.ko.Spec.NotebookInstanceLifecycleConfigName) {
 		delta.Add("Spec.NotebookInstanceLifecycleConfigName", a.ko.Spec.NotebookInstanceLifecycleConfigName, b.ko.Spec.NotebookInstanceLifecycleConfigName)
