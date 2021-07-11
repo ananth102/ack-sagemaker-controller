@@ -24,6 +24,14 @@ operations:
     resource_name: HyperParameterTuningJob
   # DescribeNotebookInstance:
   #   set_output_custom_method_name: customDescribeNotebookSetOutput
+  DescribeModelBiasJobDefinition:
+    primary_identifier_field_name: JobDefinitionName
+  DescribeModelExplainabilityJobDefinition:
+    primary_identifier_field_name: JobDefinitionName
+  DescribeModelQualityJobDefinition:
+    primary_identifier_field_name: JobDefinitionName
+  DescribeDataQualityJobDefinition:
+    primary_identifier_field_name: JobDefinitionName
 resources:
   Model:
     hooks:
@@ -168,7 +176,7 @@ resources:
       delta_pre_compare:
         code: customSetDefaults(a, b)
       sdk_read_one_post_set_output: 
-        template_path: notebook_instance/sdk_read_one_post_set_output.tpl
+        code: rm.customSetOutputDescribe(r, ko)
       sdk_create_post_set_output:
         code: rm.customSetOutput(desired, aws.String(svcsdk.NotebookInstanceStatusPending), ko)
     fields:
