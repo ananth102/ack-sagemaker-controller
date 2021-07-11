@@ -104,8 +104,8 @@ class TestNotebookInstance:
         )
     def _assert_notebook_status_in_sync(self, notebook_instance_name, reference, expected_status):
         assert(
-            self._wait_sagemaker_notebook_status(notebook_instance_name,expected_status)
-        == self._wait_resource_notebook_status(reference,expected_status)
+            self._wait_sagemaker_notebook_status(notebook_instance_name,expected_status,wait_periods=60,period_length=15)
+        == self._wait_resource_notebook_status(reference,expected_status,wait_periods=60,period_length=15)
         == expected_status
         )
     def testUpdateAndDelete(self,notebook_instance):
@@ -122,12 +122,14 @@ class TestNotebookInstance:
         self._assert_notebook_status_in_sync(notebook_instance_name,reference,"InService")
 
         #Update Notebook
+        spec["metadata"]["annotations"]["stop_after_update"] = "enabled"
         spec["spec"]["volumeSizeInGB"] = 7
+        # k8s.patch_custom_resource(reference,resource)
         k8s.patch_custom_resource(reference,spec)
         resource = k8s.wait_resource_consumed_by_controller(reference)
         assert resource is not None
 
-        self._assert_notebook_status_in_sync(notebook_instance_name,reference,"InService")
+        self._assert_notebook_status_in_sync(notebook_instance_name,reference,"Stopped")
 
         latest_notebook = get_notebook_instance(notebook_instance_name)
         assert(latest_notebook["VolumeSizeInGB"] == 7)
