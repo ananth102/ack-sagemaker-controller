@@ -22,8 +22,6 @@ operations:
   StopHyperParameterTuningJob:
     operation_type: Delete
     resource_name: HyperParameterTuningJob
-  # DescribeNotebookInstance:
-  #   set_output_custom_method_name: customDescribeNotebookSetOutput
   DescribeModelBiasJobDefinition:
     primary_identifier_field_name: JobDefinitionName
   DescribeModelExplainabilityJobDefinition:
@@ -165,14 +163,8 @@ resources:
         - UnrecognizedClientException
         - VolumeModificationRateExceeded
     hooks:
-      # sdk_update_pre_build_request:
-      #   template_path: notebook_instance/sdk_update_pre_build_request.go.tpl
       sdk_delete_pre_build_request:
         code: rm.customDelete(r)
-      # sdk_update_post_request:
-      #   template_path: notebook_instance/sdk_update_post_build_request.go.tpl
-      # sdk_update_post_set_output:
-      #   template_path: notebook_instance/sdk_update_post_set_output.tpl
       delta_pre_compare:
         code: customSetDefaults(a, b)
       sdk_read_one_post_set_output: 
