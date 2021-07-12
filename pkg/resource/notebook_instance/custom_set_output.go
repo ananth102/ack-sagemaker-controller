@@ -53,17 +53,16 @@ func (rm *resourceManager) customSetOutputDescribe(r *resource,
 	notebook_state := *ko.Status.NotebookInstanceStatus // Get the Notebook State
 	/*
 		If the notebook is in the stopped state there can be three conditions:
-		A. Notebook is stopping for the update - In this case w.Message will be either nothing or  "DONE_UPDATING" and the notebook will update.
-		B. The notebook has updated - In this case w.Message will be "CURRENTLY_UPDATING" and the notebook will start.
-		C. The user has stopped the notebook -  In this case w.Message will be "DONE_UPDATING" and the notebook will stay stopped.
+		A. Notebook is stopping for the update - In this case w.Message will be either nothing or  "PRE_UPDATE" and the notebook will update.
+		B. The notebook has updated - In this case w.Message will be "POST_UPDATE" and the notebook will start.
+		C. The user has stopped the notebook -  In this case w.Message will be "PRE_UPDATE" and the notebook will stay stopped.
 	*/
-	inServiceSTR := "DONE_UPDATING"
-	updatingSTR := "CURRENTLY_UPDATING"
+	inServiceSTR := "PRE_UPDATE"
+	updatingSTR := "POST_UPDATE"
 	if notebook_state == svcsdk.NotebookInstanceStatusStopped {
 		for _, w := range ko.Status.Conditions {
 			if w.Type == ackv1alpha1.ConditionTypeResourceSynced {
 				if *w.Message == updatingSTR {
-					/* fmt.Println("\n \n", notebook_state, "   meyooooww   ", w, "\n \n") */
 					val, ok := r.ko.Annotations["stop_after_update"]
 					/* If there is an annotation to stop the notebook we will just keep it in the stop state and finish reconciliation. */
 					if ok && strings.ToLower(val) == "enabled" {
@@ -87,7 +86,6 @@ func (rm *resourceManager) customSetOutputDescribe(r *resource,
 
 						}
 					}
-
 					break
 				}
 			}
@@ -95,7 +93,7 @@ func (rm *resourceManager) customSetOutputDescribe(r *resource,
 
 	}
 	/*
-		This code ensures that the notebook prope
+		This code ensures that the notebook has the proper conditions for updating.
 	*/
 	if notebook_state == svcsdk.NotebookInstanceStatusPending || notebook_state == svcsdk.NotebookInstanceStatusInService {
 		for _, w := range ko.Status.Conditions {
