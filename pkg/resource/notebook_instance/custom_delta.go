@@ -8,6 +8,7 @@ func customSetDefaults(
 	a *resource,
 	b *resource,
 ) {
+	/* We just set the defualts here in case the user does not specify them. This avoids the controller trying to update itself right after creation. */
 	if ackcompare.IsNil(a.ko.Spec.DirectInternetAccess) && ackcompare.IsNotNil(b.ko.Spec.DirectInternetAccess) {
 		a.ko.Spec.DirectInternetAccess = b.ko.Spec.DirectInternetAccess
 	}

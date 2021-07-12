@@ -304,11 +304,6 @@ func (rm *resourceManager) sdkUpdate(
 	rlog := ackrtlog.FromContext(ctx)
 	exit := rlog.Trace("rm.sdkUpdate")
 	defer exit(err)
-	/* This prevents the notebook from finishing reconciliation after it reaches the Updating state */
-	if *latest.ko.Status.NotebookInstanceStatus == svcsdk.NotebookInstanceStatusUpdating {
-		return nil, requeueWaitWhileUpdating
-	}
-	rm.customPreUpdate(ctx, desired, latest, delta)
 	input, err := rm.newUpdateRequestPayload(ctx, desired)
 	if err != nil {
 		return nil, err
@@ -317,10 +312,6 @@ func (rm *resourceManager) sdkUpdate(
 	var resp *svcsdk.UpdateNotebookInstanceOutput
 	_ = resp
 	resp, err = rm.sdkapi.UpdateNotebookInstanceWithContext(ctx, input)
-	/* We need this call below in case update succeeds Instantaneously */
-	if *latest.ko.Status.NotebookInstanceStatus == svcsdk.NotebookInstanceStatusUpdating {
-		return nil, requeueWaitWhileUpdating
-	}
 	rm.metrics.RecordAPICall("UPDATE", "UpdateNotebookInstance", err)
 	if err != nil {
 		return nil, err
@@ -330,20 +321,6 @@ func (rm *resourceManager) sdkUpdate(
 	ko := desired.ko.DeepCopy()
 
 	rm.setStatusDefaults(ko)
-	/*
-		This sets resource synced to false so the controller Requeues after it reaches the stopped state.
-		If we dont do this we would have to poll Sagemaker once per second.
-	*/
-	updatingSTR := "CURRENTLY_UPDATING"
-	rm.customSetOutput(desired, ko.Status.NotebookInstanceStatus, ko)
-	for _, w := range ko.Status.Conditions {
-		if w.Type == ackv1alpha1.ConditionTypeResourceSynced {
-			w.Status = corev1.ConditionFalse
-			w.Message = &updatingSTR
-			break
-		}
-
-	}
 	return &resource{ko}, nil
 }
 
@@ -406,7 +383,7 @@ func (rm *resourceManager) sdkDelete(
 	rlog := ackrtlog.FromContext(ctx)
 	exit := rlog.Trace("rm.sdkDelete")
 	defer exit(err)
-	rm.customDelete(ctx, r)
+	rm.customDelete(r)
 	input, err := rm.newDeleteRequestPayload(r)
 	if err != nil {
 		return err
