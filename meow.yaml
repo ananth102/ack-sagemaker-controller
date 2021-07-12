@@ -1,12 +1,8 @@
 apiVersion: sagemaker.services.k8s.aws/v1alpha1
 kind: NotebookInstance
 metadata:
-  annotations:
-    controller-gen.kubebuilder.io/version: v0.4.0
-    # stop_after_update: enabled
   name: test301
-  
-  
+
 spec:
   instanceType: ml.t2.medium
   notebookInstanceName: test301
