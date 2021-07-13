@@ -9,12 +9,9 @@ spec:
   instanceType: ml.t2.medium
   notebookInstanceName: my-notebook
   roleARN: <YOUR SAGEMAKER ROLE ARN>
-  volumeSizeInGB: 6  
+  # Optional Parameters
+  volumeSizeInGB: 6
   directInternetAccess: Enabled
   rootAccess: Enabled
-  tags: [
-    {
-      "Key": "Development"
-      "Value": "Kubernetes"
-    }
-  ]
+  lifecycleConfigName: my-lifecycle
+  defaultCodeRepository: <YOUR github Repo>
