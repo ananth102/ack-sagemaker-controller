@@ -220,7 +220,7 @@ func (rm *resourceManager) sdkCreate(
 	}
 
 	rm.setStatusDefaults(ko)
-	rm.customSetOutput(desired, aws.String(svcsdk.NotebookInstanceStatusPending), ko)
+	rm.customSetOutput(aws.String(svcsdk.NotebookInstanceStatusPending), ko)
 	return &resource{ko}, nil
 }
 
@@ -383,6 +383,14 @@ func (rm *resourceManager) sdkDelete(
 	rlog := ackrtlog.FromContext(ctx)
 	exit := rlog.Trace("rm.sdkDelete")
 	defer exit(err)
+	//This will avoid the exponential backoff
+	if isNotebookStopping(r) {
+		return requeueWaitWhileStopping
+	}
+	if isNotebookPending(r) {
+		return requeueWaitWhilePending
+	}
+
 	rm.customDelete(r)
 	input, err := rm.newDeleteRequestPayload(r)
 	if err != nil {

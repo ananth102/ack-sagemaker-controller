@@ -164,13 +164,13 @@ resources:
         - VolumeModificationRateExceeded
     hooks:
       sdk_delete_pre_build_request:
-        code: rm.customDelete(r)
+        template_path: notebook_instance/sdk_delete_pre_build_request.go.tpl
       delta_pre_compare:
         code: customSetDefaults(a, b)
       sdk_read_one_post_set_output: 
         code: rm.customSetOutputDescribe(r, ko)
       sdk_create_post_set_output:
-        code: rm.customSetOutput(desired, aws.String(svcsdk.NotebookInstanceStatusPending), ko)
+        code: rm.customSetOutput(aws.String(svcsdk.NotebookInstanceStatusPending),ko)
     fields:
       NotebookInstanceStatus:
         is_read_only: true
