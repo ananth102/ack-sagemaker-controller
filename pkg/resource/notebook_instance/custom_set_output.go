@@ -13,9 +13,13 @@ func (rm *resourceManager) customSetOutput(
 		return
 	}
 
+	pendingReason := "Notebook is currenty starting"
+
 	if *notebookInstanceStatus == svcsdk.NotebookInstanceStatusDeleting || *notebookInstanceStatus == svcsdk.NotebookInstanceStatusFailed || *notebookInstanceStatus == svcsdk.NotebookInstanceStatusInService || *notebookInstanceStatus == svcsdk.NotebookInstanceStatusStopped {
 		ackcond.SetSynced(&resource{ko}, corev1.ConditionTrue, nil, nil)
 
+	} else if *notebookInstanceStatus == svcsdk.NotebookInstanceStatusPending {
+		ackcond.SetSynced(&resource{ko}, corev1.ConditionFalse, nil, &pendingReason)
 	} else {
 		ackcond.SetSynced(&resource{ko}, corev1.ConditionFalse, nil, nil)
 	}
@@ -26,6 +30,6 @@ func (rm *resourceManager) customSetOutputDescribe(r *resource,
 	ko *svcapitypes.NotebookInstance) {
 
 	notebook_state := *ko.Status.NotebookInstanceStatus // Get the Notebook State
-	rm.customSetOutput(&notebook_state, ko)             // We do this incase the resource is adopted or experienced some other error.
+	rm.customSetOutput(&notebook_state, ko)             // We set the sync status here
 
 }
