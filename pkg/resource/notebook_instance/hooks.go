@@ -10,7 +10,7 @@ import (
 
 var (
 	requeueWaitWhileStopping = ackrequeue.NeededAfter(
-		errors.New("NotebookInstance in 'Stopping' state, cannot be modified or deleted"),
+		errors.New("NotebookInstance in 'Stopping' state, currently transitioning to 'Stopped' so Notebook can be modified or deleted"),
 		10*time.Second,
 	)
 	requeueWaitWhilePending = ackrequeue.NeededAfter(

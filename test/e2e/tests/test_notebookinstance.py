@@ -61,7 +61,7 @@ def get_notebook_instance(notebook_instance_name: str):
         return desired_notebook_instance
     except botocore.exceptions.ClientError as error:
         logging.error(
-            f"SageMaker could not find a training job with the name {training_job_name}. Error {error}"
+            f"SageMaker could not find a Notebook Instance with the name {notebook_instance_name}. Error {error}"
         )
         return None
 
@@ -115,8 +115,9 @@ class TestNotebookInstance:
         notebook_description = get_notebook_instance(notebook_instance_name)
         assert notebook_description["NotebookInstanceStatus"] == "Pending"
 
+        #wait for the resource to go to the InService state and make sure the operator is synced with sagemaker.
         self._assert_notebook_status_in_sync(notebook_instance_name,reference,"InService")
 
         # Delete the k8s resource.
-        _, deleted = k8s.delete_custom_resource(reference, 11, 30) # Notebook takes a while to delete because it has to be stopped first and because of the exponential backoff that occurs while deleting it
+        _, deleted = k8s.delete_custom_resource(reference, 11, 30)
         assert deleted is True
