@@ -383,10 +383,11 @@ func (rm *resourceManager) sdkDelete(
 	rlog := ackrtlog.FromContext(ctx)
 	exit := rlog.Trace("rm.sdkDelete")
 	defer exit(err)
-	//This will avoid the exponential backoff
+	//This will avoid exponential backoff
 	if isNotebookStopping(r) {
 		return requeueWaitWhileStopping
 	}
+	//This will avoid exponential backoff
 	if isNotebookPending(r) {
 		return requeueWaitWhilePending
 	}
