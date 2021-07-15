@@ -17,7 +17,6 @@ package domain
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	ackv1alpha1 "github.com/aws-controllers-k8s/runtime/apis/core/v1alpha1"
@@ -62,8 +61,6 @@ func (rm *resourceManager) sdkFind(
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Println(*r.ko.Spec.DomainID)
 
 	var resp *svcsdk.DescribeDomainOutput
 	resp, err = rm.sdkapi.DescribeDomainWithContext(ctx, input)
@@ -304,8 +301,6 @@ func (rm *resourceManager) sdkCreate(
 	} else {
 		ko.Status.URL = nil
 	}
-
-	fmt.Println(*ko.Spec.DomainID)
 
 	rm.setStatusDefaults(ko)
 	return &resource{ko}, nil

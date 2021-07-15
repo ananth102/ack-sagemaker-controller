@@ -390,7 +390,7 @@ resources:
     exceptions:
       errors:
           404:
-            code: ResourceNotFound
+            code: ValidationError
       terminal_codes:
         - ResourceLimitExceeded
         - ResourceNotFound
@@ -405,26 +405,12 @@ resources:
         - InvalidAction
         - UnrecognizedClientException
     hooks:
-      delta_pre_compare:
-        code: customSetDefaults(a, b)
-  NotebookInstanceLifecycleConfig:
-    exceptions:
-      errors:
-          404:
-            code: ResourceNotFound
-      terminal_codes:
-        - ResourceLimitExceeded
-        - ResourceNotFound
-        - ResourceInUse
-        - OptInRequired
-        - InvalidParameterCombination
-        - InvalidParameterValue
-        - MissingParameter
-        - MissingAction
-        - InvalidQueryParameter
-        - MalformedQueryString
-        - InvalidAction
-        - UnrecognizedClientException
+       sdk_read_one_post_request:
+         template_path: notebook_instance_lifecycle_config/sdk_readOne_post_request.go.tpl
+       sdk_create_post_build_request:
+         code: input = rm.fixNotebookLFinput(input)
+      #  delta_post_compare:
+
   Domain:
     exceptions:
       errors:

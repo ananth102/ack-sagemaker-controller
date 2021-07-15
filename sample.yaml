@@ -1,19 +1,18 @@
 apiVersion: sagemaker.services.k8s.aws/v1alpha1
 kind: NotebookInstanceLifecycleConfig
 metadata:
-  name: wooe
+  name: test4
 spec:
-  notebookInstanceLifecycleConfigName: wooe
+  notebookInstanceLifecycleConfigName: test4
   # role: arn:aws:iam::475866477710:role/service-role/AmazonSageMakerServiceCatalogProductsUseRole
-  onCreate:
-    - content: "pipwidddd"
-  onStart:
-    - content: "pipwfgdfdggdfu"
   # onCreate:
-  #          -  |
-  #                     wget http://mirrors.ctan.org/macros/latex/contrib/upquote.zip
-
-  #                     EOF
+  #   - content: "pip install"
+  onStart:
+    - content: "pip is"
+  onCreate:
+           - content: | 
+              wget http://mirrors.ctan.org/macros/latex/contrib/upquote.zip
+              EOF
   # onStart:
   #         - content: |
   #                     set -e

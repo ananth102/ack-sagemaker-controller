@@ -64,9 +64,18 @@ func (rm *resourceManager) sdkFind(
 
 	var resp *svcsdk.DescribeNotebookInstanceLifecycleConfigOutput
 	resp, err = rm.sdkapi.DescribeNotebookInstanceLifecycleConfigWithContext(ctx, input)
+	awErr, ok := ackerr.AWSError(err)
+
+	if ok {
+		errMsg := awErr.Message()
+		if strings.Contains(errMsg, "Notebook Instance Lifecycle Config does not exist") {
+			return nil, ackerr.NotFound
+		}
+
+	}
 	rm.metrics.RecordAPICall("READ_ONE", "DescribeNotebookInstanceLifecycleConfig", err)
 	if err != nil {
-		if awsErr, ok := ackerr.AWSError(err); ok && awsErr.Code() == "ResourceNotFound" {
+		if awsErr, ok := ackerr.AWSError(err); ok && awsErr.Code() == "ValidationError" {
 			return nil, ackerr.NotFound
 		}
 		return nil, err
@@ -115,6 +124,8 @@ func (rm *resourceManager) sdkFind(
 		ko.Spec.OnStart = nil
 	}
 
+	// fmt.Println("\n \n resource lengththth ", len(r.ko.Spec.OnCreate), "\n \n   ")
+
 	rm.setStatusDefaults(ko)
 	return &resource{ko}, nil
 }
@@ -157,6 +168,7 @@ func (rm *resourceManager) sdkCreate(
 	if err != nil {
 		return nil, err
 	}
+	input = rm.fixNotebookLFinput(input)
 
 	var resp *svcsdk.CreateNotebookInstanceLifecycleConfigOutput
 	_ = resp
