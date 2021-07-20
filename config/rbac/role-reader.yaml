@@ -20,6 +20,7 @@ rules:
   - modelpackagegroups
   - modelqualityjobdefinitions
   - monitoringschedules
+  - presignednotebookinstanceurls
   - processingjobs
   - trainingjobs
   - transformjobs

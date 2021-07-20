@@ -20,6 +20,7 @@ rules:
   - modelpackagegroups
   - modelqualityjobdefinitions
   - monitoringschedules
+  - presignednotebookinstanceurls
   - processingjobs
   - trainingjobs
   - transformjobs
@@ -45,6 +46,7 @@ rules:
   - modelpackagegroups
   - modelqualityjobdefinitions
   - monitoringschedules
+  - presignednotebookinstanceurls
   - processingjobs
   - trainingjobs
   - transformjobs

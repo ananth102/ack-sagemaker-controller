@@ -14,6 +14,7 @@ resources:
   - bases/sagemaker.services.k8s.aws_modelpackagegroups.yaml
   - bases/sagemaker.services.k8s.aws_modelqualityjobdefinitions.yaml
   - bases/sagemaker.services.k8s.aws_monitoringschedules.yaml
+  - bases/sagemaker.services.k8s.aws_presignednotebookinstanceurls.yaml
   - bases/sagemaker.services.k8s.aws_processingjobs.yaml
   - bases/sagemaker.services.k8s.aws_trainingjobs.yaml
   - bases/sagemaker.services.k8s.aws_transformjobs.yaml

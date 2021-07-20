@@ -1376,7 +1376,9 @@ type NotebookInstanceLifecycleConfigSummary struct {
 
 // Provides summary information for an Amazon SageMaker notebook instance.
 type NotebookInstanceSummary struct {
-	CreationTime *metav1.Time `json:"creationTime,omitempty"`
+	CreationTime         *metav1.Time `json:"creationTime,omitempty"`
+	NotebookInstanceName *string      `json:"notebookInstanceName,omitempty"`
+	URL                  *string      `json:"url,omitempty"`
 }
 
 // Specifies the number of training jobs that this hyperparameter tuning job

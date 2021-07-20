@@ -1,0 +1,8 @@
+apiVersion: sagemaker.services.k8s.aws/v1alpha1
+kind: PresignedNotebookInstanceURL
+metadata:
+  name: test10
+  
+spec:
+  notebookInstanceName: test925
+  sessionExpirationDurationInSeconds: 1000
