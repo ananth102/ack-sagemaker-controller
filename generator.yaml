@@ -579,7 +579,7 @@ resources:
           name: STATUS
         from:
           operation: CreatePresignedNotebookInstanceURL
-          path: PresignedNotebookInstanceURLStatus
+          path: AuthorizedURL
       
 ignore:
     resource_names:

@@ -4,5 +4,5 @@ metadata:
   name: test10
   
 spec:
-  notebookInstanceName: test925
-  sessionExpirationDurationInSeconds: 1000
+  notebookInstanceName: test91
+  sessionExpirationDurationInSeconds: 1800

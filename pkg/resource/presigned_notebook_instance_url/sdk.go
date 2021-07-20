@@ -17,6 +17,7 @@ package presigned_notebook_instance_url
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	ackv1alpha1 "github.com/aws-controllers-k8s/runtime/apis/core/v1alpha1"
@@ -47,6 +48,12 @@ func (rm *resourceManager) sdkFind(
 	ctx context.Context,
 	r *resource,
 ) (*resource, error) {
+	fmt.Println("\n \n \n", r.ko.Status.AuthorizedURL, "\n \n \n")
+	// return nil, ackerr.NotFound
+	if r.ko.Status.AuthorizedURL == nil {
+		// ackcond.set
+		return nil, ackerr.NotFound
+	}
 	// Believe it or not, there are API resources that can be created but there
 	// is no read operation. Point in case: RDS' CreateDBInstanceReadReplica
 	// has no corresponding read operation that I know of...
@@ -80,8 +87,10 @@ func (rm *resourceManager) sdkCreate(
 	ko := desired.ko.DeepCopy()
 
 	if resp.AuthorizedUrl != nil {
+		fmt.Println("\n \n nsdkjsjknsjdsj \n \n")
 		ko.Status.AuthorizedURL = resp.AuthorizedUrl
 	} else {
+		fmt.Println("\n \n wowowoowowo \n \n")
 		ko.Status.AuthorizedURL = nil
 	}
 
