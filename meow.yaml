@@ -1,0 +1,12 @@
+apiVersion: sagemaker.services.k8s.aws/v1alpha1
+kind: NotebookInstance
+metadata:
+  name: test81
+  
+spec:
+  instanceType: ml.t2.medium
+  notebookInstanceName: test81
+  roleARN: arn:aws:iam::475866477710:role/service-role/AmazonSageMakerServiceCatalogProductsUseRole
+  volumeSizeInGB: 5
+  directInternetAccess: Enabled
+  rootAccess: Disabled

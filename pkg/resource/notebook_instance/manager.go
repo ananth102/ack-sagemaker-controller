@@ -92,6 +92,7 @@ func (rm *resourceManager) ReadOne(
 		}
 		return rm.onError(r, err)
 	}
+	fmt.Println("\n \n  readone check", *observed.ko.Spec.RootAccess, "\n \n")
 	return rm.onSuccess(observed)
 }
 
@@ -219,6 +220,7 @@ func (rm *resourceManager) onSuccess(
 	r *resource,
 ) (acktypes.AWSResource, error) {
 	r1, updated := rm.updateConditions(r, true, nil)
+	fmt.Println("\n \n  on sucess check", *r1.ko.Spec.RootAccess, "\n \n")
 	if !updated {
 		return r, nil
 	}

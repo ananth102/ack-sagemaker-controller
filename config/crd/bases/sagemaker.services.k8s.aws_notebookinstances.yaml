@@ -217,10 +217,6 @@ spec:
                 description: The URL that you use to connect to the Jupyter notebook
                   that is running in your notebook instance.
                 type: string
-              stoppedByAck:
-                description: The URL that you use to connect to the Jupyter notebook
-                  that is running in your notebook instance.
-                type: string
             required:
             - ackResourceMetadata
             - conditions

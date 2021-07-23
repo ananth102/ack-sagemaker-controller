@@ -7,9 +7,13 @@ if isNotebookPending(latest){
 if isNotebookUpdating(latest) && latest.ko.Status.FailureReason == nil {
 	return latest, requeueWaitWhileUpdating
 }
-stopped_by_ack := rm.customPreUpdate(ctx,desired,latest)
+stopped_by_ack := rm.customPreUpdate(ctx, desired, latest)
 if stopped_by_ack {
-		stopped_by_ack_str := "true"
-		latest.ko.Status.StoppedByAck = &stopped_by_ack_str
-		return latest, requeueWaitWhileStopping
+	curr := latest.ko.GetAnnotations()
+	if curr == nil {
+		curr = make(map[string]string)
+	}
+	curr["stopped_by_ack"] = "true"
+	latest.ko.SetAnnotations(curr)
+	return latest, nil
 }

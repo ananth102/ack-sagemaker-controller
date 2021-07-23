@@ -75,10 +75,6 @@ func (rm *resourceManager) sdkFind(
 	// Merge in the information we read from the API call above to the copy of
 	// the original Kubernetes object we passed to the function
 	ko := r.ko.DeepCopy()
-	tmp := ""
-	if r != nil && r.ko != nil && r.ko.Status.StoppedByAck != nil {
-		tmp = *r.ko.Status.StoppedByAck
-	}
 
 	if resp.AcceleratorTypes != nil {
 		f0 := []*string{}
@@ -167,7 +163,6 @@ func (rm *resourceManager) sdkFind(
 
 	rm.setStatusDefaults(ko)
 	rm.customSetOutputDescribe(r, ko)
-	r.ko.Status.StoppedByAck = &tmp //covers a scenario where the code generator sets r.ko.Status.StoppedByAck
 	return &resource{ko}, nil
 }
 
@@ -325,8 +320,13 @@ func (rm *resourceManager) sdkUpdate(
 	}
 	stopped_by_ack := rm.customPreUpdate(ctx, desired, latest)
 	if stopped_by_ack {
-		stopped_by_ack_str := "true"
-		latest.ko.Status.StoppedByAck = &stopped_by_ack_str
+		curr := latest.ko.GetAnnotations()
+		if curr == nil {
+			curr = make(map[string]string)
+		}
+		curr["stopped_by_ack"] = "true"
+		latest.ko.SetAnnotations(curr)
+		rm.customSetOutput(aws.String("Stopping"), latest.ko)
 		return latest, requeueWaitWhileStopping
 	}
 	input, err := rm.newUpdateRequestPayload(ctx, desired)
