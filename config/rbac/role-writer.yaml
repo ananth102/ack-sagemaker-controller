@@ -9,6 +9,7 @@ rules:
 - apiGroups:
   - sagemaker.services.k8s.aws
   resources:
+  - apps
   - dataqualityjobdefinitions
   - endpoints
   - endpointconfigs
@@ -35,6 +36,7 @@ rules:
 - apiGroups:
   - sagemaker.services.k8s.aws
   resources:
+  - apps
   - dataqualityjobdefinitions
   - endpoints
   - endpointconfigs

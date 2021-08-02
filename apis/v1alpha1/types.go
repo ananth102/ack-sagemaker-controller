@@ -89,7 +89,12 @@ type AlgorithmValidationSpecification struct {
 
 // Details about an Amazon SageMaker app.
 type AppDetails struct {
-	CreationTime *metav1.Time `json:"creationTime,omitempty"`
+	AppName         *string      `json:"appName,omitempty"`
+	AppType         *string      `json:"appType,omitempty"`
+	CreationTime    *metav1.Time `json:"creationTime,omitempty"`
+	DomainID        *string      `json:"domainID,omitempty"`
+	Status          *string      `json:"status,omitempty"`
+	UserProfileName *string      `json:"userProfileName,omitempty"`
 }
 
 // The configuration for running a SageMaker image as a KernelGateway app.
@@ -507,6 +512,7 @@ type DeviceSummary struct {
 // The domain's details.
 type DomainDetails struct {
 	CreationTime *metav1.Time `json:"creationTime,omitempty"`
+	DomainID     *string      `json:"domainID,omitempty"`
 }
 
 // The model on the edge device.
@@ -905,6 +911,7 @@ type HyperParameterTuningJobWarmStartConfig struct {
 type Image struct {
 	CreationTime     *metav1.Time `json:"creationTime,omitempty"`
 	FailureReason    *string      `json:"failureReason,omitempty"`
+	ImageARN         *string      `json:"imageARN,omitempty"`
 	LastModifiedTime *metav1.Time `json:"lastModifiedTime,omitempty"`
 }
 
@@ -925,6 +932,8 @@ type ImageConfig struct {
 type ImageVersion struct {
 	CreationTime     *metav1.Time `json:"creationTime,omitempty"`
 	FailureReason    *string      `json:"failureReason,omitempty"`
+	ImageARN         *string      `json:"imageARN,omitempty"`
+	ImageVersionARN  *string      `json:"imageVersionARN,omitempty"`
 	LastModifiedTime *metav1.Time `json:"lastModifiedTime,omitempty"`
 }
 
@@ -963,6 +972,20 @@ type IntegerParameterRange struct {
 type IntegerParameterRangeSpecification struct {
 	MaxValue *string `json:"maxValue,omitempty"`
 	MinValue *string `json:"minValue,omitempty"`
+}
+
+// The JupyterServer app settings.
+type JupyterServerAppSettings struct {
+	// Specifies the ARN's of a SageMaker image and SageMaker image version, and
+	// the instance type that the version runs on.
+	DefaultResourceSpec *ResourceSpec `json:"defaultResourceSpec,omitempty"`
+}
+
+// The KernelGateway app settings.
+type KernelGatewayAppSettings struct {
+	// Specifies the ARN's of a SageMaker image and SageMaker image version, and
+	// the instance type that the version runs on.
+	DefaultResourceSpec *ResourceSpec `json:"defaultResourceSpec,omitempty"`
 }
 
 // Provides configuration information for auto-labeling of your data objects.
@@ -1889,6 +1912,14 @@ type ResourceLimits struct {
 	MaxParallelTrainingJobs *int64 `json:"maxParallelTrainingJobs,omitempty"`
 }
 
+// Specifies the ARN's of a SageMaker image and SageMaker image version, and
+// the instance type that the version runs on.
+type ResourceSpec struct {
+	InstanceType             *string `json:"instanceType,omitempty"`
+	SageMakerImageARN        *string `json:"sageMakerImageARN,omitempty"`
+	SageMakerImageVersionARN *string `json:"sageMakerImageVersionARN,omitempty"`
+}
+
 // Describes the S3 data source.
 type S3DataSource struct {
 	AttributeNames         []*string `json:"attributeNames,omitempty"`
@@ -1998,6 +2029,13 @@ type SubscribedWorkteam struct {
 type Tag struct {
 	Key   *string `json:"key,omitempty"`
 	Value *string `json:"value,omitempty"`
+}
+
+// The TensorBoard app settings.
+type TensorBoardAppSettings struct {
+	// Specifies the ARN's of a SageMaker image and SageMaker image version, and
+	// the instance type that the version runs on.
+	DefaultResourceSpec *ResourceSpec `json:"defaultResourceSpec,omitempty"`
 }
 
 // Configuration of storage locations for the Debugger TensorBoard output data.
@@ -2391,7 +2429,9 @@ type UserContext struct {
 
 // The user profile details.
 type UserProfileDetails struct {
-	CreationTime *metav1.Time `json:"creationTime,omitempty"`
+	CreationTime    *metav1.Time `json:"creationTime,omitempty"`
+	DomainID        *string      `json:"domainID,omitempty"`
+	UserProfileName *string      `json:"userProfileName,omitempty"`
 }
 
 // A collection of settings that apply to users of Amazon SageMaker Studio.
