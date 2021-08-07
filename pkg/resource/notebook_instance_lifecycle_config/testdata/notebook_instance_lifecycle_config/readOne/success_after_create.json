@@ -1,0 +1,16 @@
+{
+  "CreationTime": "2021-08-07T18:54:20.393Z",
+  "LastModifiedTime": "2021-08-07T18:54:20.393Z",
+  "NotebookInstanceLifecycleConfigArn": "arn:aws:sagemaker:us-east-2:475866477710:notebook-instance-lifecycle-config/test",
+  "NotebookInstanceLifecycleConfigName": "test",
+  "OnCreate": [
+   {
+    "Content": "d2dldCBodHRwOi8vbWlycm9ycy5jdGFuLm9yZy9tYWNyb3MvbGF0ZXgvY29udHJpYi91cHF1b3RlLnppcA0KRU9G"
+   }
+  ],
+  "OnStart": [
+   {
+    "Content": "cGlwIGluc3RhbGwgUElM"
+   }
+  ]
+ }

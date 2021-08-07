@@ -1,0 +1,14 @@
+apiVersion: sagemaker.services.k8s.aws/v1alpha1
+kind: NotebookInstanceLifecycleConfig
+metadata:
+  name: test
+spec:
+  notebookInstanceLifecycleConfigName: test
+  onStart:
+    - content: cGlwIGluc3RhbGwgUElM
+  onCreate:
+    - content: d2dldCBodHRwOi8vbWlycm9ycy5jdGFuLm9yZy9tYWNyb3MvbGF0ZXgvY29udHJpYi91cHF1b3RlLnppcA0KRU9G
+status:
+  ackResourceMetadata:
+    ownerAccountID: ""
+  lastModifiedTime: 2021-08-07T18:54:20.393Z

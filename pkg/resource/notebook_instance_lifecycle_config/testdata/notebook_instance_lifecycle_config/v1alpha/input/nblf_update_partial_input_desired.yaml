@@ -1,0 +1,8 @@
+apiVersion: sagemaker.services.k8s.aws/v1alpha1
+kind: NotebookInstanceLifecycleConfig
+metadata:
+  name: test
+spec:
+  notebookInstanceLifecycleConfigName: test
+  onStart:
+    - content: cGlwIGluc3RhbGwgUElM

@@ -1,0 +1,17 @@
+apiVersion: sagemaker.services.k8s.aws/v1alpha1
+kind: NotebookInstanceLifecycleConfig
+metadata:
+  name: test
+spec:
+  notebookInstanceLifecycleConfigName: test
+  onStart:
+    - content: GlwIGluc3RhbGwguelM
+  onCreate:
+    - content: d2dldCBodHRwOi8vbWlycm9ycy5jdGFuLm9yZy9tYWNyb3MvbGF0ZXgvY29udHJpYi91cHF1b3RlLnppcA0KRU9G
+status:
+  ackResourceMetadata:
+    ownerAccountID: ""
+    Conditions:
+      Message: "Unable to update Notebook Instance Lifecycle Config 'arn:aws:sagemaker:us-east-2:1234:notebook-instance-lifecycle-config/test'. (Details: The Content field of a NotebookInstanceLifecycleHook must be a base64-encoded string.)"
+      Status: "True"
+      Type: ACK.Recoverable
