@@ -1,0 +1,82 @@
+tests:
+  - name: "Notebook Instance Lifecycle Configuration tests"
+    description: "Notebook Instance Lifecycle Configuration Creation unit tests"
+    scenarios:
+      - name: "Create=InvalidInput"
+        description: "Given one of the parameters is invalid, ko.Status shows a terminal condition"
+        given:
+          desired_state: "v1alpha/create/desired/nblf_invalid_before_create.yaml"
+          svc_api:
+            - operation: CreateNotebookInstanceLifecycleConfigWithContext
+              error:
+                code: InvalidParameterValue
+                message: "The Notebook Instance Lifecycle config name must start with an alphanumeric character."
+        invoke: Create
+        expect:
+          latest_state: "v1alpha1/v1alpha//nblf_invalid_after_create.yaml"
+          error: resource is in terminal condition
+      # - name: "Create=Success"
+      #  description: "Sucessful Invocation of create"
+      #  given:
+      #    desired_state: "notebook_instance_lifecycle/v1alpha/input/nblf_success_before_create.yaml"
+      #    svc_api:
+      #      - operation: CreateNotebookInstanceLifecycleConfigWithContext
+      #        output_fixture: notebook_instance_lifecycle/create/create_res.json
+      #  invoke: Create
+      #  expect:
+      #    latest_state: "notebook_instance_lifecycle/v1alpha/output/nblf_success_after_create.yaml"
+      #    error: nil
+  
+  # - name: "Notebook Instance Lifecycle Configuration Update unit tests"
+  #   description: "Tests that update the Notebook Instance Lifecycle configuration"
+  #   scenarios:
+  #     - name: "Update=Full"
+  #       description: "Update a Notebook Instance Lifecycle Configuration with all values"
+  #       given:
+  #         desired_state: "notebook_instance_lifecycle_config/v1alpha/input/nblf_update_full_input_desired.yaml"
+  #         latest_state: "notebook_instance_lifecycle_config/v1alpha/input/nblf_update_full_input_latest.yaml"
+  #         svc_api:
+  #           - operation: UpdateNotebookInstanceLifecycleConfigWithContext
+  #       invoke: Update
+  #       expect:
+  #         latest_state: "notebook_instance_lifecycle_config/v1alpha/v1alpha/nblf_update_full_output.yaml"
+  #         error: nil
+  #     - name: "Update=Partial"
+  #       description: "Update a Notebook Instance Lifecycle Configuration with some values"
+  #       given:
+  #         desired_state: "notebook_instance_lifecycle_config/v1alpha/input/nblf_update_partial_input_desired.yaml"
+  #         latest_state: "notebook_instance_lifecycle_config/v1alpha/input/nblf_update_partial_input_latest.yaml"
+  #         svc_api:
+  #           - operation: UpdateNotebookInstanceLifecycleConfigWithContext
+  #       invoke: Update
+  #       expect:
+  #         latest_state: "notebook_instance_lifecycle_config/v1alpha/output/nblf_update_partial_output.yaml"
+  #         error: nil
+  #     - name: "Update=Error"
+  #       description: "Update a Notebook Instance Lifecycle Configuration with values that will cause an error"
+  #       given:
+  #         desired_state: "notebook_instance_lifecycle_config/v1alpha/input/nblf_update_partial_input_desired.yaml"
+  #         latest_state: "notebook_instance_lifecycle_config/v1alpha/input/nblf_update_partial_input_latest.yaml"
+  #         svc_api:
+  #           - operation: UpdateNotebookInstanceLifecycleConfigWithContext
+  #           - error:
+  #             - code: ValidationException
+  #             - message: "Unable to update Notebook Instance Lifecycle Config 'arn:aws:sagemaker:us-east-2:1234:notebook-instance-lifecycle-config/test'. (Details: The Content field of a NotebookInstanceLifecycleHook must be a base64-encoded string.)"
+  #       invoke: Update
+  #       expect:
+  #         latest_state: "notebook_instance_lifecycle_config/v1alpha/output/nblf_update_partial_output.yaml"
+  #         error: "Unable to update Notebook Instance Lifecycle Config 'arn:aws:sagemaker:us-east-2:1234:notebook-instance-lifecycle-config/test'. (Details: The Content field of a NotebookInstanceLifecycleHook must be a base64-encoded string.)"
+
+  # - name: "Delete Tests"
+  #   description: "Deleting a Notebook Instance Lifecycle Configuration"
+  #   scenarios:
+  #     - name: "Delete=Immediate"
+  #       description: "Deleting a Notebook Instance Lifecycle Configuration"
+  #       given:
+  #         desired_state: nblf_delete_input.yaml
+  #         svc_api:
+  #           - operation: DeleteNotebookInstanceLifecycleConfigWithContext
+  #       invoke: Delete
+  #       expect:
+  #         latest_state: nil
+  #         error: nil
