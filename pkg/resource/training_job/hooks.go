@@ -16,6 +16,7 @@ package training_job
 import (
 	"errors"
 
+	ackcompare "github.com/aws-controllers-k8s/runtime/pkg/compare"
 	ackrequeue "github.com/aws-controllers-k8s/runtime/pkg/requeue"
 	svccommon "github.com/aws-controllers-k8s/sagemaker-controller/pkg/common"
 	"github.com/aws/aws-sdk-go/aws"
@@ -31,37 +32,57 @@ var (
 		svcsdk.RuleEvaluationStatusInProgress,
 		svcsdk.RuleEvaluationStatusStopping,
 	}
+	WarmPoolModifyingStatuses = []string{
+		svcsdk.WarmPoolResourceStatusAvailable,
+		svcsdk.WarmPoolResourceStatusInUse,
+	}
 	resourceName = GroupKind.Kind
 
 	requeueWaitWhileDeleting = ackrequeue.NeededAfter(
 		errors.New(resourceName+" is Stopping."),
 		ackrequeue.DefaultRequeueAfterDuration,
 	)
+
+	requeueWaitWhileWarmPoolInUse = ackrequeue.NeededAfter(
+		errors.New("Provisioned infrastructure is still being retained."),
+		ackrequeue.DefaultRequeueAfterDuration,
+	)
 )
 
 // customSetOutput sets the resource ResourceSynced condition to False if
 // TrainingJob is being modified by AWS. It checks for debug and profiler rule status in addition to TrainingJobStatus
-func (rm *resourceManager) customSetOutput(r *resource) {
+func (rm *resourceManager) customSetOutput(r *resource) error {
 	trainingJobStatus := r.ko.Status.TrainingJobStatus
 	// early exit if training job is InProgress
 	if trainingJobStatus != nil && *trainingJobStatus == svcsdk.TrainingJobStatusInProgress {
 		svccommon.SetSyncedCondition(r, trainingJobStatus, &resourceName, &trainingJobModifyingStatuses)
-		return
+		return nil
 	}
 
 	for _, rule := range r.ko.Status.DebugRuleEvaluationStatuses {
 		if rule.RuleEvaluationStatus != nil && svccommon.IsModifyingStatus(rule.RuleEvaluationStatus, &ruleModifyingStatuses) {
 			svccommon.SetSyncedCondition(r, rule.RuleEvaluationStatus, aws.String("DebugRule"), &ruleModifyingStatuses)
-			return
+			return nil
 		}
 	}
 
 	for _, rule := range r.ko.Status.ProfilerRuleEvaluationStatuses {
 		if rule.RuleEvaluationStatus != nil && svccommon.IsModifyingStatus(rule.RuleEvaluationStatus, &ruleModifyingStatuses) {
 			svccommon.SetSyncedCondition(r, rule.RuleEvaluationStatus, aws.String("ProfilerRule"), &ruleModifyingStatuses)
-			return
+			return nil
 		}
 	}
 
 	svccommon.SetSyncedCondition(r, trainingJobStatus, &resourceName, &trainingJobModifyingStatuses)
+
+	// Requeue whenever Warmpool cluster is in Available or Inuse state.
+	if ackcompare.IsNil(r.ko.Status.WarmPoolStatus) {
+		return nil
+	}
+
+	if svccommon.IsModifyingStatus(r.ko.Status.WarmPoolStatus.Status, &WarmPoolModifyingStatuses) {
+		return requeueWaitWhileWarmPoolInUse
+	}
+	return nil
+
 }
