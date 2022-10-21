@@ -16,7 +16,6 @@ package training_job
 import (
 	"errors"
 
-	ackcompare "github.com/aws-controllers-k8s/runtime/pkg/compare"
 	ackrequeue "github.com/aws-controllers-k8s/runtime/pkg/requeue"
 	svccommon "github.com/aws-controllers-k8s/sagemaker-controller/pkg/common"
 	"github.com/aws/aws-sdk-go/aws"
@@ -40,11 +39,6 @@ var (
 
 	requeueWaitWhileDeleting = ackrequeue.NeededAfter(
 		errors.New(resourceName+" is Stopping."),
-		ackrequeue.DefaultRequeueAfterDuration,
-	)
-
-	requeueWaitWhileWarmPoolInUse = ackrequeue.NeededAfter(
-		errors.New("Warm Pool Cluster is still active."),
 		ackrequeue.DefaultRequeueAfterDuration,
 	)
 )
@@ -73,15 +67,11 @@ func (rm *resourceManager) customSetOutput(r *resource) {
 		}
 	}
 
-	svccommon.SetSyncedCondition(r, trainingJobStatus, &resourceName, &trainingJobModifyingStatuses)
-}
+	warmPoolStatus := r.ko.Status.WarmPoolStatus
+	if warmPoolStatus != nil && svccommon.IsModifyingStatus(warmPoolStatus.Status, &WarmPoolModifyingStatuses) {
+		svccommon.SetSyncedCondition(r, warmPoolStatus.Status, aws.String("Warm Pool"), &WarmPoolModifyingStatuses)
+		return
+	}
 
-func (rm *resourceManager) customSetWarmPoolOutput(r *resource) error {
-	if ackcompare.IsNil(r.ko.Status.WarmPoolStatus) {
-		return nil
-	}
-	if svccommon.IsModifyingStatus(r.ko.Status.WarmPoolStatus.Status, &WarmPoolModifyingStatuses) {
-		return requeueWaitWhileWarmPoolInUse
-	}
-	return nil
+	svccommon.SetSyncedCondition(r, trainingJobStatus, &resourceName, &trainingJobModifyingStatuses)
 }
