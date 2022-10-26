@@ -2485,6 +2485,7 @@ type ProfilerConfig struct {
 // Configuration information for updating the Debugger profile parameters, system
 // and framework metrics configurations, and storage paths.
 type ProfilerConfigForUpdate struct {
+	DisableProfiler                 *bool              `json:"disableProfiler,omitempty"`
 	ProfilingIntervalInMilliseconds *int64             `json:"profilingIntervalInMilliseconds,omitempty"`
 	ProfilingParameters             map[string]*string `json:"profilingParameters,omitempty"`
 	S3OutputPath                    *string            `json:"s3OutputPath,omitempty"`

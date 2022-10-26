@@ -1019,9 +1019,110 @@ func (rm *resourceManager) sdkUpdate(
 	desired *resource,
 	latest *resource,
 	delta *ackcompare.Delta,
-) (*resource, error) {
-	// TODO(jaypipes): Figure this out...
-	return nil, ackerr.NotImplemented
+) (updated *resource, err error) {
+	rlog := ackrtlog.FromContext(ctx)
+	exit := rlog.Trace("rm.sdkUpdate")
+	defer func() {
+		exit(err)
+	}()
+	input, err := rm.newUpdateRequestPayload(ctx, desired)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp *svcsdk.UpdateTrainingJobOutput
+	_ = resp
+	resp, err = rm.sdkapi.UpdateTrainingJobWithContext(ctx, input)
+	rm.metrics.RecordAPICall("UPDATE", "UpdateTrainingJob", err)
+	if err != nil {
+		return nil, err
+	}
+	// Merge in the information we read from the API call above to the copy of
+	// the original Kubernetes object we passed to the function
+	ko := desired.ko.DeepCopy()
+
+	if ko.Status.ACKResourceMetadata == nil {
+		ko.Status.ACKResourceMetadata = &ackv1alpha1.ResourceMetadata{}
+	}
+	if resp.TrainingJobArn != nil {
+		arn := ackv1alpha1.AWSResourceName(*resp.TrainingJobArn)
+		ko.Status.ACKResourceMetadata.ARN = &arn
+	}
+
+	rm.setStatusDefaults(ko)
+	return &resource{ko}, nil
+}
+
+// newUpdateRequestPayload returns an SDK-specific struct for the HTTP request
+// payload of the Update API call for the resource
+func (rm *resourceManager) newUpdateRequestPayload(
+	ctx context.Context,
+	r *resource,
+) (*svcsdk.UpdateTrainingJobInput, error) {
+	res := &svcsdk.UpdateTrainingJobInput{}
+
+	if r.ko.Spec.ProfilerConfig != nil {
+		f0 := &svcsdk.ProfilerConfigForUpdate{}
+		if r.ko.Spec.ProfilerConfig.DisableProfiler != nil {
+			f0.SetDisableProfiler(*r.ko.Spec.ProfilerConfig.DisableProfiler)
+		}
+		if r.ko.Spec.ProfilerConfig.ProfilingIntervalInMilliseconds != nil {
+			f0.SetProfilingIntervalInMilliseconds(*r.ko.Spec.ProfilerConfig.ProfilingIntervalInMilliseconds)
+		}
+		if r.ko.Spec.ProfilerConfig.ProfilingParameters != nil {
+			f0f2 := map[string]*string{}
+			for f0f2key, f0f2valiter := range r.ko.Spec.ProfilerConfig.ProfilingParameters {
+				var f0f2val string
+				f0f2val = *f0f2valiter
+				f0f2[f0f2key] = &f0f2val
+			}
+			f0.SetProfilingParameters(f0f2)
+		}
+		if r.ko.Spec.ProfilerConfig.S3OutputPath != nil {
+			f0.SetS3OutputPath(*r.ko.Spec.ProfilerConfig.S3OutputPath)
+		}
+		res.SetProfilerConfig(f0)
+	}
+	if r.ko.Spec.ProfilerRuleConfigurations != nil {
+		f1 := []*svcsdk.ProfilerRuleConfiguration{}
+		for _, f1iter := range r.ko.Spec.ProfilerRuleConfigurations {
+			f1elem := &svcsdk.ProfilerRuleConfiguration{}
+			if f1iter.InstanceType != nil {
+				f1elem.SetInstanceType(*f1iter.InstanceType)
+			}
+			if f1iter.LocalPath != nil {
+				f1elem.SetLocalPath(*f1iter.LocalPath)
+			}
+			if f1iter.RuleConfigurationName != nil {
+				f1elem.SetRuleConfigurationName(*f1iter.RuleConfigurationName)
+			}
+			if f1iter.RuleEvaluatorImage != nil {
+				f1elem.SetRuleEvaluatorImage(*f1iter.RuleEvaluatorImage)
+			}
+			if f1iter.RuleParameters != nil {
+				f1elemf4 := map[string]*string{}
+				for f1elemf4key, f1elemf4valiter := range f1iter.RuleParameters {
+					var f1elemf4val string
+					f1elemf4val = *f1elemf4valiter
+					f1elemf4[f1elemf4key] = &f1elemf4val
+				}
+				f1elem.SetRuleParameters(f1elemf4)
+			}
+			if f1iter.S3OutputPath != nil {
+				f1elem.SetS3OutputPath(*f1iter.S3OutputPath)
+			}
+			if f1iter.VolumeSizeInGB != nil {
+				f1elem.SetVolumeSizeInGB(*f1iter.VolumeSizeInGB)
+			}
+			f1 = append(f1, f1elem)
+		}
+		res.SetProfilerRuleConfigurations(f1)
+	}
+	if r.ko.Spec.TrainingJobName != nil {
+		res.SetTrainingJobName(*r.ko.Spec.TrainingJobName)
+	}
+
+	return res, nil
 }
 
 // sdkDelete deletes the supplied resource in the backend AWS service API

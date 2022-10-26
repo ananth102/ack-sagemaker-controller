@@ -874,7 +874,6 @@ ignore:
       - Workforce
       - Workteam
     operations:
-      - UpdateTrainingJob
       - UpdateFeatureGroup
     shape_names:
       # RSessionAppSettings is an empty struct that causes generation errors
