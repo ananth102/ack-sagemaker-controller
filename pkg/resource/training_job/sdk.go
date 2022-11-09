@@ -1043,9 +1043,141 @@ func (rm *resourceManager) sdkUpdate(
 	desired *resource,
 	latest *resource,
 	delta *ackcompare.Delta,
-) (*resource, error) {
-	// TODO(jaypipes): Figure this out...
-	return nil, ackerr.NotImplemented
+) (updated *resource, err error) {
+	rlog := ackrtlog.FromContext(ctx)
+	exit := rlog.Trace("rm.sdkUpdate")
+	defer func() {
+		exit(err)
+	}()
+	input, err := rm.newUpdateRequestPayload(ctx, desired)
+	if err != nil {
+		return nil, err
+	}
+	warmpool_diff := delta.DifferentAt("Spec.ResourceConfig.KeepAlivePeriodInSeconds")
+	profiler_diff := delta.DifferentAt("Spec.ProfilerConfig") && delta.DifferentAt("Spec.ProfilerRuleConfigurations")
+	trainingJobStatus := latest.ko.Status.TrainingJobStatus
+	if warmpool_diff && profiler_diff {
+		return latest, nil
+	}
+	if warmpool_diff {
+		warmpool_terminal := customWarmPool(latest)
+		if warmpool_terminal {
+			return latest, nil
+		}
+		if err := customSetOutputUpdate(latest); err != nil {
+			return nil, err
+		}
+	}
+	if profiler_diff {
+		input.SetResourceConfig(nil)
+		if trainingJobStatus != nil && *trainingJobStatus != svcsdk.TrainingJobStatusInProgress {
+			return latest, nil
+		}
+		if disableProfilerCheck(desired, latest) {
+			customSetDisableProfiler(input)
+		}
+	}
+
+	var resp *svcsdk.UpdateTrainingJobOutput
+	_ = resp
+	resp, err = rm.sdkapi.UpdateTrainingJobWithContext(ctx, input)
+	rm.metrics.RecordAPICall("UPDATE", "UpdateTrainingJob", err)
+	if err != nil {
+		return nil, err
+	}
+	// Merge in the information we read from the API call above to the copy of
+	// the original Kubernetes object we passed to the function
+	ko := desired.ko.DeepCopy()
+
+	if ko.Status.ACKResourceMetadata == nil {
+		ko.Status.ACKResourceMetadata = &ackv1alpha1.ResourceMetadata{}
+	}
+	if resp.TrainingJobArn != nil {
+		arn := ackv1alpha1.AWSResourceName(*resp.TrainingJobArn)
+		ko.Status.ACKResourceMetadata.ARN = &arn
+	}
+
+	rm.setStatusDefaults(ko)
+
+	fmt.Println("\n \nWOOWOWOWOOWOWOWOOWOWOOWOWO \n")
+
+	return &resource{ko}, nil
+}
+
+// newUpdateRequestPayload returns an SDK-specific struct for the HTTP request
+// payload of the Update API call for the resource
+func (rm *resourceManager) newUpdateRequestPayload(
+	ctx context.Context,
+	r *resource,
+) (*svcsdk.UpdateTrainingJobInput, error) {
+	res := &svcsdk.UpdateTrainingJobInput{}
+
+	if r.ko.Spec.ProfilerConfig != nil {
+		f0 := &svcsdk.ProfilerConfigForUpdate{}
+		if r.ko.Spec.ProfilerConfig.ProfilingIntervalInMilliseconds != nil {
+			f0.SetProfilingIntervalInMilliseconds(*r.ko.Spec.ProfilerConfig.ProfilingIntervalInMilliseconds)
+		}
+		if r.ko.Spec.ProfilerConfig.ProfilingParameters != nil {
+			f0f1 := map[string]*string{}
+			for f0f1key, f0f1valiter := range r.ko.Spec.ProfilerConfig.ProfilingParameters {
+				var f0f1val string
+				f0f1val = *f0f1valiter
+				f0f1[f0f1key] = &f0f1val
+			}
+			f0.SetProfilingParameters(f0f1)
+		}
+		if r.ko.Spec.ProfilerConfig.S3OutputPath != nil {
+			f0.SetS3OutputPath(*r.ko.Spec.ProfilerConfig.S3OutputPath)
+		}
+		res.SetProfilerConfig(f0)
+	}
+	if r.ko.Spec.ProfilerRuleConfigurations != nil {
+		f1 := []*svcsdk.ProfilerRuleConfiguration{}
+		for _, f1iter := range r.ko.Spec.ProfilerRuleConfigurations {
+			f1elem := &svcsdk.ProfilerRuleConfiguration{}
+			if f1iter.InstanceType != nil {
+				f1elem.SetInstanceType(*f1iter.InstanceType)
+			}
+			if f1iter.LocalPath != nil {
+				f1elem.SetLocalPath(*f1iter.LocalPath)
+			}
+			if f1iter.RuleConfigurationName != nil {
+				f1elem.SetRuleConfigurationName(*f1iter.RuleConfigurationName)
+			}
+			if f1iter.RuleEvaluatorImage != nil {
+				f1elem.SetRuleEvaluatorImage(*f1iter.RuleEvaluatorImage)
+			}
+			if f1iter.RuleParameters != nil {
+				f1elemf4 := map[string]*string{}
+				for f1elemf4key, f1elemf4valiter := range f1iter.RuleParameters {
+					var f1elemf4val string
+					f1elemf4val = *f1elemf4valiter
+					f1elemf4[f1elemf4key] = &f1elemf4val
+				}
+				f1elem.SetRuleParameters(f1elemf4)
+			}
+			if f1iter.S3OutputPath != nil {
+				f1elem.SetS3OutputPath(*f1iter.S3OutputPath)
+			}
+			if f1iter.VolumeSizeInGB != nil {
+				f1elem.SetVolumeSizeInGB(*f1iter.VolumeSizeInGB)
+			}
+			f1 = append(f1, f1elem)
+		}
+		res.SetProfilerRuleConfigurations(f1)
+	}
+	if r.ko.Spec.ResourceConfig != nil {
+		f2 := &svcsdk.ResourceConfigForUpdate{}
+		if r.ko.Spec.ResourceConfig.KeepAlivePeriodInSeconds != nil {
+			f2.SetKeepAlivePeriodInSeconds(*r.ko.Spec.ResourceConfig.KeepAlivePeriodInSeconds)
+		}
+		res.SetResourceConfig(f2)
+	}
+	if r.ko.Spec.TrainingJobName != nil {
+		res.SetTrainingJobName(*r.ko.Spec.TrainingJobName)
+	}
+
+	return res, nil
 }
 
 // sdkDelete deletes the supplied resource in the backend AWS service API

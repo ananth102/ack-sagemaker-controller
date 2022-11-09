@@ -132,6 +132,8 @@ resources:
         template_path: training_job/sdk_delete_pre_build_request.go.tpl
       sdk_delete_post_request:
         template_path: common/sdk_delete_post_request.go.tpl
+      sdk_update_post_build_request:
+        template_path: training_job/sdk_update_post_build_request.go.tpl
     fields:
       TrainingJobStatus:
         is_read_only: true
@@ -301,7 +303,7 @@ resources:
       sdk_delete_pre_build_request:
         template_path: hyper_parameter_tuning_job/sdk_delete_pre_build_request.go.tpl
       sdk_delete_post_request:
-        template_path: common/sdk_delete_post_request.go.tpl
+        template_path: common/sdk_delete_post_request.go.tpl       
     fields:
       HyperParameterTuningJobStatus:
         is_read_only: true
@@ -879,7 +881,6 @@ ignore:
       - Workforce
       - Workteam
     operations:
-      - UpdateTrainingJob
       - UpdateFeatureGroup
     shape_names:
       # RSessionAppSettings is an empty struct that causes generation errors
@@ -895,3 +896,4 @@ ignore:
       - CanvasAppSettings
       - ExplainerConfig
       - HyperParameterTuningJobStrategyConfig
+      - DisableProfiler

@@ -47,6 +47,11 @@ var (
 		errors.New("Provisioned infrastructure is still being retained."),
 		ackrequeue.DefaultRequeueAfterDuration,
 	)
+
+	requeueBeforeUpdate = ackrequeue.NeededAfter(
+		errors.New("Warm pool cannot be updated in InProgress state requeuing until TrainingJob reaches completed state."),
+		ackrequeue.DefaultRequeueAfterDuration,
+	)
 )
 
 // customSetOutput sets the resource ResourceSynced condition to False if
@@ -75,14 +80,31 @@ func (rm *resourceManager) customSetOutput(r *resource) error {
 
 	svccommon.SetSyncedCondition(r, trainingJobStatus, &resourceName, &trainingJobModifyingStatuses)
 
-	// Requeue whenever Warmpool cluster is in Available or Inuse state.
+	warmPoolStatus := r.ko.Status.WarmPoolStatus
+	if warmPoolStatus != nil {
+		svccommon.SetSyncedCondition(r, r.ko.Status.WarmPoolStatus.Status, aws.String("Warm Pool Cluster"), &WarmPoolModifyingStatuses)
+	}
+
+	return nil
+
+}
+
+// This function makes the controller requeue if there is an update and
+// the training job is still in InProgress
+func customSetOutputUpdate(r *resource) error {
+	trainingJobStatus := r.ko.Status.TrainingJobStatus
+	if trainingJobStatus != nil && *trainingJobStatus != svcsdk.TrainingJobStatusCompleted {
+		return requeueBeforeUpdate
+	}
+	return nil
+}
+func customWarmPool(r *resource) bool {
 	if ackcompare.IsNil(r.ko.Status.WarmPoolStatus) {
-		return nil
+		return true // Warm pool can only be updated iff there is a provisioned cluster.
 	}
 
 	if svccommon.IsModifyingStatus(r.ko.Status.WarmPoolStatus.Status, &WarmPoolModifyingStatuses) {
-		return requeueWaitWhileWarmPoolInUse
+		return false
 	}
-	return nil
-
+	return true // Non modifying state
 }
