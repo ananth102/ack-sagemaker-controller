@@ -76,6 +76,11 @@ type TrainingJobSpec struct {
 	// You can specify a maximum of 100 hyperparameters. Each hyperparameter is
 	// a key-value pair. Each key and value is limited to 256 characters, as specified
 	// by the Length Constraint.
+	//
+	// Do not include any security-sensitive information including account access
+	// IDs, secrets or tokens in any hyperparameter field. If the use of security-sensitive
+	// credentials are detected, SageMaker will reject your training job request
+	// and return an exception error.
 	HyperParameters map[string]*string `json:"hyperParameters,omitempty"`
 	// An array of Channel objects. Each channel is a named input source. InputDataConfig
 	// describes the input data and its location.
@@ -257,6 +262,9 @@ type TrainingJobStatus struct {
 	// For more detailed information, see SecondaryStatus.
 	// +kubebuilder:validation:Optional
 	TrainingJobStatus *string `json:"trainingJobStatus,omitempty"`
+	// The status of the warm pool associated with the training job.
+	// +kubebuilder:validation:Optional
+	WarmPoolStatus *WarmPoolStatus `json:"warmPoolStatus,omitempty"`
 }
 
 // TrainingJob is the Schema for the TrainingJobs API

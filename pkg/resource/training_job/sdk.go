@@ -503,6 +503,9 @@ func (rm *resourceManager) sdkFind(
 		if resp.ResourceConfig.InstanceType != nil {
 			f25.InstanceType = resp.ResourceConfig.InstanceType
 		}
+		if resp.ResourceConfig.KeepAlivePeriodInSeconds != nil {
+			f25.KeepAlivePeriodInSeconds = resp.ResourceConfig.KeepAlivePeriodInSeconds
+		}
 		if resp.ResourceConfig.VolumeKmsKeyId != nil {
 			f25.VolumeKMSKeyID = resp.ResourceConfig.VolumeKmsKeyId
 		}
@@ -596,6 +599,21 @@ func (rm *resourceManager) sdkFind(
 		ko.Spec.VPCConfig = f39
 	} else {
 		ko.Spec.VPCConfig = nil
+	}
+	if resp.WarmPoolStatus != nil {
+		f39 := &svcapitypes.WarmPoolStatus{}
+		if resp.WarmPoolStatus.ResourceRetainedBillableTimeInSeconds != nil {
+			f39.ResourceRetainedBillableTimeInSeconds = resp.WarmPoolStatus.ResourceRetainedBillableTimeInSeconds
+		}
+		if resp.WarmPoolStatus.ReusedByJob != nil {
+			f39.ReusedByJob = resp.WarmPoolStatus.ReusedByJob
+		}
+		if resp.WarmPoolStatus.Status != nil {
+			f39.Status = resp.WarmPoolStatus.Status
+		}
+		ko.Status.WarmPoolStatus = f39
+	} else {
+		ko.Status.WarmPoolStatus = nil
 	}
 
 	rm.setStatusDefaults(ko)
@@ -998,6 +1016,9 @@ func (rm *resourceManager) newCreateRequestPayload(
 		}
 		if r.ko.Spec.ResourceConfig.InstanceType != nil {
 			f14.SetInstanceType(*r.ko.Spec.ResourceConfig.InstanceType)
+		}
+		if r.ko.Spec.ResourceConfig.KeepAlivePeriodInSeconds != nil {
+			f14.SetKeepAlivePeriodInSeconds(*r.ko.Spec.ResourceConfig.KeepAlivePeriodInSeconds)
 		}
 		if r.ko.Spec.ResourceConfig.VolumeKMSKeyID != nil {
 			f14.SetVolumeKmsKeyId(*r.ko.Spec.ResourceConfig.VolumeKMSKeyID)

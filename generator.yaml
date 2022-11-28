@@ -169,7 +169,12 @@ resources:
           priority: 1
         from:
           operation: DescribeTrainingJob
-          path: FailureReason 
+          path: FailureReason
+      WarmPoolStatus:
+        is_read_only: true
+        from:
+          operation: DescribeTrainingJob
+          path: WarmPoolStatus
       AlgorithmSpecification.MetricDefinitions:
         compare:
           is_ignored: true
@@ -890,3 +895,8 @@ ignore:
       - ExecutionRoleIdentityConfig
       - HyperParameterTuningResourceConfig
       - InstanceMetadataServiceConfiguration
+      - InstanceGroups
+      - InstanceGroupNames
+      - CanvasAppSettings
+      - ExplainerConfig
+      - HyperParameterTuningJobStrategyConfig

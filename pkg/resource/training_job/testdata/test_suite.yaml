@@ -152,6 +152,46 @@ tests:
         invoke: ReadOne
         expect:
           latest_state: "v1alpha1/readone/observed/created_instance_groups.yaml"
+      - name: "ReadOne=WarmPool"
+        description: "Test readOne after training job finishes when user specifies a warm pool"
+        given:
+          desired_state: "v1alpha1/readone/desired/warmpool.yaml"
+          svc_api:
+            - operation: DescribeTrainingJobWithContext
+              output_fixture: "sdkapi/describe/warmpool_describe_available.json"
+        invoke: ReadOne
+        expect:
+          latest_state: "v1alpha1/readone/observed/warmpool_available.yaml"
+      - name: "ReadOne=WarmPoolTerminated"
+        description: "Test readOne after training job and warm pool complete/terminate."
+        given:
+          desired_state: "v1alpha1/readone/desired/warmpool.yaml"
+          svc_api:
+            - operation: DescribeTrainingJobWithContext
+              output_fixture: "sdkapi/describe/warmpool_describe_terminated.json"
+        invoke: ReadOne
+        expect:
+          latest_state: "v1alpha1/readone/observed/warmpool_terminated.yaml"
+      - name: "ReadOne=WarmPoolReused"
+        description: "Test Warmpool reused state"
+        given:
+          desired_state: "v1alpha1/readone/desired/warmpool.yaml"
+          svc_api:
+            - operation: DescribeTrainingJobWithContext
+              output_fixture: "sdkapi/describe/warmpool_describe_reused.json"
+        invoke: ReadOne
+        expect:
+          latest_state: "v1alpha1/readone/observed/warmpool_reused.yaml"
+      - name: "ReadOne=WarmPoolInUse"
+        description: "Test Warmpool inuse state"
+        given:
+          desired_state: "v1alpha1/readone/desired/warmpool.yaml"
+          svc_api:
+            - operation: DescribeTrainingJobWithContext
+              output_fixture: "sdkapi/describe/warmpool_describe_inuse.json"
+        invoke: ReadOne
+        expect:
+          latest_state: "v1alpha1/readone/observed/warmpool_inuse.yaml"
   - name: "Training job update tests"
     description: "Testing the Update operation"
     scenarios:

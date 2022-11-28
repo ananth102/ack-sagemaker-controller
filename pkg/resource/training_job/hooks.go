@@ -16,6 +16,7 @@ package training_job
 import (
 	"errors"
 
+	ackcompare "github.com/aws-controllers-k8s/runtime/pkg/compare"
 	ackrequeue "github.com/aws-controllers-k8s/runtime/pkg/requeue"
 	svccommon "github.com/aws-controllers-k8s/sagemaker-controller/pkg/common"
 	"github.com/aws/aws-sdk-go/aws"
@@ -30,6 +31,10 @@ var (
 	ruleModifyingStatuses = []string{
 		svcsdk.RuleEvaluationStatusInProgress,
 		svcsdk.RuleEvaluationStatusStopping,
+	}
+	WarmPoolModifyingStatuses = []string{
+		svcsdk.WarmPoolResourceStatusAvailable,
+		svcsdk.WarmPoolResourceStatusInUse,
 	}
 	resourceName = GroupKind.Kind
 
@@ -64,4 +69,23 @@ func (rm *resourceManager) customSetOutput(r *resource) {
 	}
 
 	svccommon.SetSyncedCondition(r, trainingJobStatus, &resourceName, &trainingJobModifyingStatuses)
+
+	warmpoolUsed := ackcompare.IsNotNil(r.ko.Spec.ResourceConfig) && ackcompare.IsNotNil(r.ko.Spec.ResourceConfig.KeepAlivePeriodInSeconds)
+
+	// Only requeue when warm pool is being used and when training job is in the completed state.
+	// WP will always have terminated status on error(Training Job or Warmpool).
+	if ackcompare.IsNotNil(trainingJobStatus) && *trainingJobStatus == svcsdk.TrainingJobStatusCompleted &&
+		warmpoolUsed {
+
+		// Sometimes DescribeTrainingJob does not contain the warm pool status
+		// In this condition the only possible status is Available or Terminated.
+		if ackcompare.IsNotNil(trainingJobStatus) && ackcompare.IsNil(r.ko.Status.WarmPoolStatus) {
+			svccommon.SetSyncedCondition(r, aws.String("Available"), aws.String("Warm Pool Infrastructure"), &WarmPoolModifyingStatuses)
+		}
+
+		if svccommon.IsModifyingStatus(r.ko.Status.WarmPoolStatus.Status, &WarmPoolModifyingStatuses) {
+			svccommon.SetSyncedCondition(r, r.ko.Status.WarmPoolStatus.Status, aws.String("Warm Pool Infrastructure"), &WarmPoolModifyingStatuses)
+		}
+	}
+
 }
