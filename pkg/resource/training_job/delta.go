@@ -346,5 +346,6 @@ func newResourceDelta(
 		}
 	}
 
+	customPostCompare(b, a, delta)
 	return delta
 }
